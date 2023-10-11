@@ -1488,3 +1488,13 @@
       width: 320px;
     }
   }
+
+  #carousel_424e {
+    padding: 10px;
+    font-size: 18px;
+    color: navy;
+  }
+
+  a.portfolio-link:hover {
+    color:grey;
+  }
