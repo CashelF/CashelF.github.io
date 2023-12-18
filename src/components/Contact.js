@@ -1,6 +1,7 @@
 // src/components/Contact.js
 
 import React from "react";
+import emailjs from "emailjs-com";
 
 export default function Contact() {
     const [name, setName] = React.useState("");
@@ -17,13 +18,15 @@ export default function Contact() {
   
     function handleSubmit(e) {
       e.preventDefault();
-      fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({ "form-name": "contact", name, email, message }),
-      })
-        .then(() => alert("Message sent!"))
-        .catch((error) => alert(error));
+
+      emailjs.sendForm('service_7pv7xit', 'template_tnx4tqp', e.target, '0utJwY97DQWVvwhy7')
+        .then((result) => {
+            console.log(result.text);
+            alert('Message sent!');
+        }, (error) => {
+            console.log(error.text);
+            alert('Failed to send message, please try again.');
+        });
     }
 
   return (
