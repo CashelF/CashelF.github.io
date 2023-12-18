@@ -1,60 +1,67 @@
 export const projects = [
   {
-    title: "React Reserve",
-    subtitle: "MERN Stack",
+    title: "Dermetric",
+    subtitle: "Python, Scikit-learn, Flask, MongoDB, REST",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium dolore rerum laborum iure enim sint nemo omnis voluptate exercitationem eius?",
+      "AI-based skin cancer detection system using TensorFlow for preprocessing and scikit-learn for model training.",
     image: "./project-1.gif",
-    link: "https://reactbootcamp.com",
+    link: "https://github.com/CashelF/Dermetric",
   },
   {
-    title: "React Tracks",
-    subtitle: "React and Python",
+    title: "Pindepo",
+    subtitle: "Python, Flask, AWS, MongoDB, REST",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium dolore rerum laborum iure enim sint nemo omnis voluptate exercitationem eius?",
-    image: "./project-2.gif",
-    link: "https://reactbootcamp.com",
+      "Engineered a robust backend system using Flask to create RESTful APIs, enabling seamless communication between the frontend and MongoDB database for efficient data handling and hosted on AWS EC2.",
+    image: "./PindepoDemo.gif",
+    link: "https://github.com/Infinite-Loopers/SWELabProject",
   },
   {
-    title: "DevChat",
-    subtitle: "React and Firebase",
+    title: "Custom Unix Shell",
+    subtitle: "C, GDB",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium dolore rerum laborum iure enim sint nemo omnis voluptate exercitationem eius?",
-    image: "./project-3.gif",
-    link: "https://reactbootcamp.com",
+      "Implemented a custom command-line interpreter, with signal handling, advanced job control mechanisms, and comprehensive file redirection",
+    image: "./IMAGEBash.png",
+    link: "https://github.com/CashelF/YASH",
   },
   {
-    title: "Epic Todo App",
-    subtitle: "React Hooks",
+    title: "eBay in Java Project",
+    subtitle: "Java, JavaFX",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium dolore rerum laborum iure enim sint nemo omnis voluptate exercitationem eius?",
-    image: "./project-4.gif",
-    link: "https://reactbootcamp.com",
-  },
-];
-
-export const testimonials = [
-  {
-    quote:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa quod necessitatibus quidem impedit facilis? Distinctio laboriosam veritatis recusandae minus. Voluptatum accusantium hic laudantium soluta ea sapiente cupiditate officia maiores itaque.",
-    image: "https://randomuser.me/api/portraits/men/1.jpg",
-    name: "Jesse Hicks",
-    company: "Zoozle",
+      "Developed an auction platform, building server-client communication, user interface design, and auction logic.",
+    image: "./EwayDemo.gif",
+    link: "https://github.com/EE422C/fa-22-final-project-CashelF",
   },
   {
-    quote:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa quod necessitatibus quidem impedit facilis? Distinctio laboriosam veritatis recusandae minus. Voluptatum accusantium hic laudantium soluta ea sapiente cupiditate officia maiores itaque.",
-    image: "https://randomuser.me/api/portraits/men/94.jpg",
-    name: "Ruben Alvarez",
-    company: "Dooble.io",
+    title: "tan(x) Game",
+    subtitle: "C/C++, Arm Assembly, Circuits",
+    description:
+      "Collaborated to create game on the TM4C microcontroller, building a custom game engine, user controls, and graphics.",
+    image: "./TanxDemo.gif",
+    link: "https://cashel.dev",
   },
+  {
+    title: "Supervised Machine Learning Architecture Classifier",
+    subtitle: "Python, Pandas, YOLO, Figma",
+    description:
+      "Designed utilizing the YOLO computer vision framework, achieving high accuracy in recognizing building styles.",
+    image: "./ArchClassifierDemo.gif",
+    link: "https://github.com/CashelF/architecture-classifier",
+  }
 ];
 
 export const skills = [
-  "JavaScript",
+  "Python",
+  "Java",
+  "C/C++",
+  "Scala",
+  "Arm Assembly",
+  "SQL",
+  "Flask",
+  "Linux",
+  "AWS",
+  "MongoDB",
+  "Docker",
+  "Git",
+  "REST",
   "React",
-  "Next.js",
-  "Node",
-  "GraphQL",
-  "Material UI",
 ];
