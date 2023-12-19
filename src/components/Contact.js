@@ -1,33 +1,33 @@
 // src/components/Contact.js
 
 import React from "react";
-import emailjs from "emailjs-com";
 
 export default function Contact() {
     const [name, setName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [message, setMessage] = React.useState("");
   
-    function encode(data) {
-      return Object.keys(data)
-        .map(
-          (key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key])
-        )
-        .join("&");
-    }
-  
     function handleSubmit(e) {
       e.preventDefault();
-
-      emailjs.sendForm('service_7pv7xit', 'template_tnx4tqp', e.target, '0utJwY97DQWVvwhy7')
-        .then((result) => {
-            console.log(result.text);
-            alert('Message sent!');
-        }, (error) => {
-            console.log(error.text);
-            alert('Failed to send message, please try again.');
-        });
-    }
+      
+      fetch("https://getform.io/f/f60fe958-484d-4ad4-9db9-48dd01a24228", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams(new FormData(e.target)),
+      })
+      .then(response => response.text())
+      .then(data => {
+          console.log(data);
+          e.target.reset();
+          alert('Sent!');
+      })
+      .catch((error) => {
+          console.error(error);
+          alert('Failed to send, please try again.');
+      });
+  }
 
   return (
     <section id="contact" className="relative">
@@ -69,10 +69,15 @@ export default function Contact() {
           </div>
         </div>
         <form
-          netlify
           name="contact"
           onSubmit={handleSubmit}
           className="lg:w-1/3 md:w-1/2 flex flex-col md:ml-auto w-full md:py-8 mt-8 md:mt-0">
+          {/* Honeypot Field (hidden) */}
+          <div style={{ display: "none" }}>
+            <label htmlFor="bot-field">Don’t fill this out if you're human:</label>
+            <input name="bot-field" />
+          </div>
+          {/* Visible Form Fields */}
           <h2 className="text-white sm:text-4xl text-3xl mb-1 font-medium title-font">
             Hire Me
           </h2>
