@@ -4,8 +4,8 @@ export const projects = [
     subtitle: "Python, Scikit-learn, Flask, MongoDB, REST",
     description:
       "AI-based skin cancer detection system using TensorFlow for preprocessing and scikit-learn for model training.",
-    image: "./IMAGEwip.webp",
-    link: "https://github.com/CashelF/Dermetric",
+    image: "./DermetricDemo.gif",
+    link: "https://cashel.dev/Dermetric",
   },
   {
     title: "Pindepo",
