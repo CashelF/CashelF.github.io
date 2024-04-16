@@ -31,7 +31,7 @@ export default function About() {
           <img
             className="object-cover object-center rounded"
             alt="hero"
-            src="./cashel.jpg"
+            src="./cashel_animated.png"
           />
         </div>
       </div>
