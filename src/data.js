@@ -4,7 +4,8 @@ export const projects = [
     subtitle: "Python, Scikit-learn, Flask, MongoDB, REST",
     description:
       "AI-based skin cancer detection system using TensorFlow for preprocessing and scikit-learn for model training.",
-    image: "./DermetricDemo.gif",
+    stillImage: "./Dermetric.png",
+    gifImage: "./DermetricDemo.gif",
     link: "https://cashel.dev/Dermetric",
   },
   {
@@ -12,7 +13,8 @@ export const projects = [
     subtitle: "Python, Flask, AWS, MongoDB, REST",
     description:
       "Engineered a robust backend system using Flask to create RESTful APIs, enabling seamless communication between the frontend and MongoDB database for efficient data handling and hosted on AWS EC2.",
-    image: "./PindepoDemo.gif",
+    stillImage: "./Pindepo.png",
+    gifImage: "./PindepoDemo.gif",
     link: "https://github.com/Infinite-Loopers/SWELabProject",
   },
   {
@@ -20,7 +22,8 @@ export const projects = [
     subtitle: "C, GDB",
     description:
       "Implemented a custom command-line interpreter, with signal handling, advanced job control mechanisms, and comprehensive file redirection",
-    image: "./IMAGEBash.png",
+    stillImage: "./IMAGEBash.png",
+    gifImage: "",
     link: "https://github.com/CashelF/YASH",
   },
   {
@@ -28,7 +31,8 @@ export const projects = [
     subtitle: "Java, JavaFX",
     description:
       "Developed an auction platform, building server-client communication, user interface design, and auction logic.",
-    image: "./EwayDemo.gif",
+    stillImage: "./Eway.png",
+    gifImage: "./EwayDemo.gif",
     link: "https://github.com/EE422C/fa-22-final-project-CashelF",
   },
   {
@@ -36,7 +40,8 @@ export const projects = [
     subtitle: "C/C++, Arm Assembly, Circuits",
     description:
       "Collaborated to create game on the TM4C microcontroller, building a custom game engine, user controls, and graphics.",
-    image: "./TanxDemo.gif",
+    stillImage: "./Tanx.png",
+    gifImage: "./TanxDemo.gif",
     link: "https://cashel.dev",
   },
   {
@@ -44,7 +49,8 @@ export const projects = [
     subtitle: "Python, Pandas, YOLO, Figma",
     description:
       "Designed utilizing the YOLO computer vision framework, achieving high accuracy in recognizing building styles.",
-    image: "./ArchClassifierDemo.gif",
+    stillImage: "./ArchClassifier.jpg",
+    gifImage: "./ArchClassifierDemo.gif",
     link: "https://github.com/CashelF/architecture-classifier",
   }
 ];
