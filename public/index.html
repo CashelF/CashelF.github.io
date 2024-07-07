@@ -28,6 +28,48 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        let lazyloadImages = document.querySelectorAll("img.lazyload");    
+        let lazyloadThrottleTimeout;
+    
+        function lazyload () {
+          if(lazyloadThrottleTimeout) {
+            clearTimeout(lazyloadThrottleTimeout);
+          }    
+    
+          lazyloadThrottleTimeout = setTimeout(function() {
+            let scrollTop = window.pageYOffset;
+            lazyloadImages.forEach(function(img) {
+              if(img.offsetTop < (window.innerHeight + scrollTop + 200)) { // Preload 200px before viewport
+                if (!img.dataset.loaded) {  // Check if already loaded
+                  img.src = img.dataset.src;
+                  img.dataset.loaded = true;  // Mark as loaded
+                  img.classList.remove('lazyload');
+                }
+              }
+            });
+    
+            // Filter out the images that have already been loaded
+            lazyloadImages = Array.prototype.filter.call(lazyloadImages, function(img) {
+              return !img.dataset.loaded;
+            });
+    
+            if(lazyloadImages.length == 0) { 
+              document.removeEventListener("scroll", lazyload);
+              window.removeEventListener("resize", lazyload);
+              window.removeEventListener("orientationChange", lazyload);
+            }
+          }, 20);
+        }
+    
+        document.addEventListener("scroll", lazyload);
+        window.addEventListener("resize", lazyload);
+        window.addEventListener("orientationChange", lazyload);
+        lazyload();  // Also load images immediately if they are in the viewport
+      });
+    </script>
+      
     <div id="root"></div>
     <!--
       This HTML file is a template.
