@@ -23,10 +23,9 @@ export default function Projects() {
             <div className="project sm:w-1/2 w-100 p-4" key={project.image}>
               <a href={project.link} target="_blank" rel="noreferrer">
                 <img 
-                  data-src={project.image} 
-                  className="zoom lazyload" 
-                  alt="thumbnail" 
-                  width="100%" 
+                  src={project.image} 
+                  className="zoom" 
+                  alt="project gif" 
                 />
                 <h2 className="tracking-widest text-sm title-font font-medium text-green-400 mb-1">
                   {project.subtitle}
