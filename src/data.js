@@ -1,5 +1,14 @@
 export const projects = [
   {
+    title: "Mandelbrot Set Visualizer",
+    subtitle: "HTML, JavaScript, WebGL",
+    description:
+      "A simple and interactive visualization of the Mandelbrot set, utilizing WebGL for rendering.",
+    image: "./MandelbrotDemo.gif",
+    thumbnail: "./MandelbrotDemo.png",
+    link: "https://cashel.dev/mandelbrot",
+  },
+  {
     title: "Dermetric",
     subtitle: "Python, Scikit-learn, Flask, MongoDB, REST",
     description:
