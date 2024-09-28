@@ -7,6 +7,7 @@ export const projects = [
     image: "./MandelbrotDemo.gif",
     thumbnail: "./MandelbrotDemo.png",
     link: "https://cashel.dev/mandelbrot",
+    hosted: true
   },
   {
     title: "Dermetric",
@@ -16,6 +17,7 @@ export const projects = [
     image: "./DermetricDemo.gif",
     thumbnail: "./DermetricDemo.png",
     link: "https://cashel.dev/Dermetric",
+    hosted: true
   },
   {
     title: "Pindepo",
@@ -25,6 +27,7 @@ export const projects = [
     image: "./PindepoDemo.gif",
     thumbnail: "./PindepoDemo.png",
     link: "https://github.com/Infinite-Loopers/SWELabProject",
+    hosted: false
   },
   {
     title: "Custom Unix Shell",
@@ -34,6 +37,7 @@ export const projects = [
     image: "./IMAGEBash.png",
     thumbnail: "./IMAGEBash.png",
     link: "https://github.com/CashelF/YASH",
+    hosted: false
   },
   {
     title: "eBay in Java Project",
@@ -43,6 +47,7 @@ export const projects = [
     image: "./EwayDemo.gif",
     thumbnail: "./EwayDemo.png",
     link: "https://github.com/EE422C/fa-22-final-project-CashelF",
+    hosted: false
   },
   {
     title: "tan(x) Game",
@@ -52,6 +57,7 @@ export const projects = [
     image: "./TanxDemo.gif",
     thumbnail: "./TanxDemo.png",
     link: "https://cashel.dev",
+    hosted: false
   },
   {
     title: "Supervised Machine Learning Architecture Classifier",
@@ -61,6 +67,7 @@ export const projects = [
     image: "./ArchClassifierDemo.gif",
     thumbnail: "./ArchClassifierDemo.png",
     link: "https://github.com/CashelF/architecture-classifier",
+    hosted: false
   }
 ];
 
