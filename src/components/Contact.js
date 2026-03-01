@@ -3,29 +3,29 @@
 import React from "react";
 
 export default function Contact() {
-    const [name, setName] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [message, setMessage] = React.useState("");
-  
-    function handleSubmit(e) {
-      e.preventDefault();
-      
-      fetch("https://getform.io/f/f60fe958-484d-4ad4-9db9-48dd01a24228", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams(new FormData(e.target)),
-      })
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [message, setMessage] = React.useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    fetch("https://getform.io/f/f60fe958-484d-4ad4-9db9-48dd01a24228", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(new FormData(e.target)),
+    })
       .then(response => response.text())
       .then(data => {
-          console.log(data);
-          e.target.reset();
-          alert('Sent!');
+        console.log(data);
+        e.target.reset();
+        alert('Sent!');
       })
       .catch((error) => {
-          console.error(error);
-          alert('Failed to send, please try again.');
+        console.error(error);
+        alert('Failed to send, please try again.');
       });
   }
 
@@ -42,7 +42,7 @@ export default function Contact() {
             marginHeight={0}
             marginWidth={0}
             style={{ filter: "opacity(0.7)" }}
-            src="https://www.google.com/maps/embed/v1/place?q=The+University+of+Texas+at+Austin,+Speedway,+Austin,+TX,+USA&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+            src="https://www.google.com/maps/embed/v1/place?q=Cornell+Tech,+New+York,+NY&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
           />
           <div className="bg-gray-900 relative flex flex-wrap py-6 rounded shadow-md">
             <div className="lg:w-1/2 px-6">
@@ -50,8 +50,8 @@ export default function Contact() {
                 ADDRESS
               </h2>
               <p className="mt-1">
-                2515 Speedway <br />
-                Austin, TX 78712
+                2 Main St <br />
+                New York, NY 10044
               </p>
             </div>
             <div className="lg:w-1/2 px-6 mt-4 lg:mt-0">
