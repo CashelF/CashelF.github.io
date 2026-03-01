@@ -1,7 +1,7 @@
 {
   "name": "my-portfolio",
   "version": "0.1.0",
-  "homepage": "https://cashelf.github.io/",
+  "homepage": "https://cashel.dev",
   "private": true,
   "dependencies": {
     "@craco/craco": "^5.9.0",
