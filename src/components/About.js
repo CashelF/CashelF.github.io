@@ -9,10 +9,10 @@ export default function About() {
         <div className="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
           <h1 className="title-font sm:text-4xl text-3xl mb-4 font-medium text-white">
             Hi, I'm Cash.
-            <br className="hidden lg:inline-block" /> A Software Engineer.
+            <br className="hidden lg:inline-block" /> A Machine Learning Engineer.
           </h1>
           <p className="mb-8 leading-relaxed">
-            I'm an Electrical and Computer Engineering student at UT Austin, specifically interested in software engineering. I have experience with backend software development in Java and Scala from summer internships at a fintech and a delivery service company. I also have experience with frontend development in React from my work on personal projects. I'm in the market for a software engineering internship over the coming summer.
+            Cornell CS Master's student (B.S. ECE, UT Austin) and Machine Learning Engineer at Modern Intelligence specializing in distributed training and computer vision. My recent work focuses on building scalable, production-ready ML systems, including scaling DETR architectures to multi-node clusters and building large-scale auto-annotation and knowledge distillation pipelines. I am passionate about bridging research and application.
           </p>
           <div className="flex justify-center">
             <a
@@ -36,5 +36,5 @@ export default function About() {
         </div>
       </div>
     </section>
-  );    
+  );
 }

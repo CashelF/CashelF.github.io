@@ -56,7 +56,7 @@ export const projects = [
       "Audio emotion recognition system that tracks valence, arousal, and dominance dimensions in audio files over time using pre-trained transformer models with GPU acceleration.",
     image: "./ToneTrackDemo.gif",
     thumbnail: "./ToneTrackDemo.png",
-    link: "https://tone-track.lovable.app",
+    link: "https://tonetrack.cashel.dev",
     hosted: true
   },
   {
@@ -119,26 +119,26 @@ export const projects = [
     link: "https://github.com/Infinite-Loopers/SWELabProject",
     hosted: false
   },
-  {
-    title: "Custom Unix Shell",
-    subtitle: "C, GDB",
-    description:
-      "Implemented a custom command-line interpreter, with signal handling, advanced job control mechanisms, and comprehensive file redirection",
-    image: "./IMAGEBash.png",
-    thumbnail: "./IMAGEBash.png",
-    link: "https://github.com/CashelF/YASH",
-    hosted: false
-  },
-  {
-    title: "eBay in Java Project",
-    subtitle: "Java, JavaFX",
-    description:
-      "Developed an auction platform, building server-client communication, user interface design, and auction logic.",
-    image: "./EwayDemo.gif",
-    thumbnail: "./EwayDemo.png",
-    link: "https://github.com/EE422C/fa-22-final-project-CashelF",
-    hosted: false
-  },
+  // {
+  //   title: "Custom Unix Shell",
+  //   subtitle: "C, GDB",
+  //   description:
+  //     "Implemented a custom command-line interpreter, with signal handling, advanced job control mechanisms, and comprehensive file redirection",
+  //   image: "./IMAGEBash.png",
+  //   thumbnail: "./IMAGEBash.png",
+  //   link: "https://github.com/CashelF/YASH",
+  //   hosted: false
+  // },
+  // {
+  //   title: "eBay in Java Project",
+  //   subtitle: "Java, JavaFX",
+  //   description:
+  //     "Developed an auction platform, building server-client communication, user interface design, and auction logic.",
+  //   image: "./EwayDemo.gif",
+  //   thumbnail: "./EwayDemo.png",
+  //   link: "https://github.com/EE422C/fa-22-final-project-CashelF",
+  //   hosted: false
+  // },
   {
     title: "tan(x) Game",
     subtitle: "C/C++, Arm Assembly, Circuits",
@@ -146,19 +146,19 @@ export const projects = [
       "Collaborated to create game on the TM4C microcontroller, building a custom game engine, user controls, and graphics.",
     image: "./TanxDemo.gif",
     thumbnail: "./TanxDemo.png",
-    link: "https://cashel.dev",
+    link: "https://github.com/CashelF/tanx-game",
     hosted: false
   },
-  {
-    title: "Supervised Machine Learning Architecture Classifier",
-    subtitle: "Python, Pandas, YOLO, Figma",
-    description:
-      "Designed utilizing the YOLO computer vision framework, achieving high accuracy in recognizing building styles.",
-    image: "./ArchClassifierDemo.gif",
-    thumbnail: "./ArchClassifierDemo.png",
-    link: "https://github.com/CashelF/architecture-classifier",
-    hosted: false
-  }
+  // {
+  //   title: "Supervised Machine Learning Architecture Classifier",
+  //   subtitle: "Python, Pandas, YOLO, Figma",
+  //   description:
+  //     "Designed utilizing the YOLO computer vision framework, achieving high accuracy in recognizing building styles.",
+  //   image: "./ArchClassifierDemo.gif",
+  //   thumbnail: "./ArchClassifierDemo.png",
+  //   link: "https://github.com/CashelF/architecture-classifier",
+  //   hosted: false
+  // }
 ];
 
 export const skills = [
