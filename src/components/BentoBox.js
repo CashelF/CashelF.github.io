@@ -7,7 +7,7 @@ const styles = {
     borderRadius: '16px',
     overflow: 'hidden',
     position: 'relative',
-    background: 'rgba(17, 24, 39, 0.6)',
+    background: 'rgba(24, 24, 27, 0.6)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(148, 163, 184, 0.2)',
@@ -35,7 +35,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(17, 24, 39, 0.9) 100%)',
+    background: 'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(24, 24, 27, 0.9) 100%)',
   },
   bentoContent: {
     padding: '1rem',
@@ -47,7 +47,7 @@ const styles = {
     fontSize: '0.7rem',
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
-    color: '#a78bfa',
+    color: '#ffffff',
     marginBottom: '0.25rem',
   },
   bentoTitle: {
@@ -60,7 +60,7 @@ const styles = {
   bentoDescription: {
     fontSize: '0.8rem',
     lineHeight: 1.5,
-    color: '#9ca3af',
+    color: '#a1a1aa',
     margin: 0,
     overflow: 'hidden',
     display: '-webkit-box',
@@ -77,10 +77,10 @@ export default function BentoBox({ project }) {
   const [isHovered, setIsHovered] = React.useState(false);
 
   const hoverStyles = isHovered ? {
-    borderColor: 'rgba(148, 163, 184, 0.5)',
-    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.35), 0 0 30px rgba(148, 163, 184, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.35), 0 0 30px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
     transform: 'translateY(-4px)',
-    background: 'rgba(17, 24, 39, 0.75)',
+    background: 'rgba(39, 39, 42, 0.75)',
   } : {};
 
   const imageHoverStyles = isHovered ? {
@@ -88,9 +88,9 @@ export default function BentoBox({ project }) {
   } : {};
 
   return (
-    <a 
-      href={project.link} 
-      target="_blank" 
+    <a
+      href={project.link}
+      target="_blank"
       rel="noreferrer"
       style={{ ...styles.bentoBox, ...hoverStyles }}
       onMouseEnter={() => setIsHovered(true)}

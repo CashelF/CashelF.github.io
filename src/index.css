@@ -1,8 +1,124 @@
+/* Custom Monochromatic Theme Properties */
+:root {
+    --color-gray-50: #fafafa;
+    --color-gray-100: #f4f4f5;
+    --color-gray-200: #e4e4e7;
+    --color-gray-300: #d4d4d8;
+    --color-gray-400: #a1a1aa;
+    --color-gray-500: #71717a;
+    --color-gray-600: #52525b;
+    --color-gray-700: #3f3f46;
+    --color-gray-800: #27272a;
+    --color-gray-900: #18181b;
+    --color-black: #000000;
+    --color-white: #ffffff;
+}
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-html, body {
-  background-color: #111827;
-  min-height: 100vh;
+html,
+body {
+    background-color: var(--color-black);
+    min-height: 100vh;
+    margin: 0;
+    color: var(--color-gray-300);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Custom Overrides for Tailwind Classes */
+.bg-black {
+    background-color: var(--color-black) !important;
+}
+
+.bg-gray-900 {
+    background-color: var(--color-gray-900) !important;
+}
+
+.bg-gray-800 {
+    background-color: var(--color-gray-800) !important;
+}
+
+.bg-gray-700 {
+    background-color: var(--color-gray-700) !important;
+}
+
+.bg-white {
+    background-color: var(--color-white) !important;
+}
+
+.text-gray-400 {
+    color: var(--color-gray-400) !important;
+}
+
+.text-gray-300 {
+    color: var(--color-gray-300) !important;
+}
+
+.text-gray-100 {
+    color: var(--color-gray-100) !important;
+}
+
+.text-white {
+    color: var(--color-white) !important;
+}
+
+.text-black {
+    color: var(--color-black) !important;
+}
+
+.border-gray-700 {
+    border-color: var(--color-gray-700) !important;
+}
+
+.border-gray-600 {
+    border-color: var(--color-gray-600) !important;
+}
+
+.border-white {
+    border-color: var(--color-white) !important;
+}
+
+.hover\:bg-gray-200:hover {
+    background-color: var(--color-gray-200) !important;
+}
+
+.hover\:bg-gray-800:hover {
+    background-color: var(--color-gray-800) !important;
+}
+
+.hover\:bg-white:hover {
+    background-color: var(--color-white) !important;
+}
+
+.hover\:text-white:hover {
+    color: var(--color-white) !important;
+}
+
+.hover\:text-black:hover {
+    color: var(--color-black) !important;
+}
+
+.hover\:border-white:hover {
+    border-color: var(--color-white) !important;
+}
+
+.focus\:border-white:focus {
+    border-color: var(--color-white) !important;
+}
+
+.focus\:border-gray-400:focus {
+    border-color: var(--color-gray-400) !important;
+}
+
+.focus\:ring-gray-600:focus {
+    --tw-ring-color: var(--color-gray-600) !important;
 }

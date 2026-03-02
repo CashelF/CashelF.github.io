@@ -46,9 +46,9 @@ export default function Projects() {
         </div>
         <div style={gridStyle}>
           {hostedProjects.map((project) => (
-            <BentoBox 
+            <BentoBox
               key={project.title}
-              project={project} 
+              project={project}
             />
           ))}
         </div>
@@ -63,9 +63,9 @@ export default function Projects() {
         </div>
         <div style={gridStyle}>
           {otherProjects.map((project) => (
-            <BentoBox 
+            <BentoBox
               key={project.title}
-              project={project} 
+              project={project}
             />
           ))}
         </div>
