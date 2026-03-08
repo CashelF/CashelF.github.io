@@ -43,12 +43,43 @@ function sample(list) {
 function replaceYellowAccent(color) {
   const hsl = { h: 0, s: 0, l: 0 };
   color.getHSL(hsl);
-  const isYellowHue = hsl.h >= 0.09 && hsl.h <= 0.18;
+  const isYellowHue = hsl.h >= 0.06 && hsl.h <= 0.18;
   const isAccent = hsl.s >= 0.22 && hsl.l >= 0.2;
 
   if (isYellowHue && isAccent) {
     color.copy(MARVIN_ACCENT_DARK);
   }
+}
+
+function isWarmAccentPixel(red, green, blue) {
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const delta = max - min;
+
+  if (max < 70 || delta < 18) {
+    return false;
+  }
+
+  let hue = 0;
+  if (delta > 0) {
+    if (max === red) {
+      hue = ((green - blue) / delta) % 6;
+    } else if (max === green) {
+      hue = (blue - red) / delta + 2;
+    } else {
+      hue = (red - green) / delta + 4;
+    }
+  }
+
+  hue *= 60;
+  if (hue < 0) {
+    hue += 360;
+  }
+
+  const saturation = max === 0 ? 0 : delta / max;
+  const luminance = (max + min) / 510;
+
+  return hue >= 28 && hue <= 72 && saturation >= 0.16 && luminance >= 0.16;
 }
 
 function remapYellowTexture(texture) {
@@ -86,22 +117,15 @@ function remapYellowTexture(texture) {
       continue;
     }
 
-    const yellowish =
-      red > 110 &&
-      green > 90 &&
-      blue < 135 &&
-      red > blue + 18 &&
-      green > blue + 10;
-
-    if (!yellowish) {
+    if (!isWarmAccentPixel(red, green, blue)) {
       continue;
     }
 
     const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
-    const shade = clamp(Math.round(42 + luminance * 42), 42, 86);
+    const shade = clamp(Math.round(34 + luminance * 40), 34, 82);
     data[index] = shade;
     data[index + 1] = shade;
-    data[index + 2] = Math.min(255, shade + 6);
+    data[index + 2] = Math.min(255, shade + 8);
   }
 
   context.putImageData(imageData, 0, 0);
@@ -117,7 +141,7 @@ function getCardGeometry(scopeElement) {
 
   const scopeRect = scopeElement.getBoundingClientRect();
 
-  return Array.from(scopeElement.querySelectorAll(".robot-play-target"))
+  return Array.from(scopeElement.querySelectorAll(".robot-play-target, [data-robot-target]"))
     .map((element) => {
       const rect = element.getBoundingClientRect();
       return {
@@ -130,7 +154,7 @@ function getCardGeometry(scopeElement) {
         height: rect.height,
       };
     })
-    .filter((card) => card.width > 0 && card.height > 0);
+    .filter((card) => card.width >= 28 && card.height >= 16);
 }
 
 function getStandingPoint(card, preferredX) {
@@ -647,7 +671,7 @@ export default function SiteRobot({ scopeRef }) {
         if (!cancelled) {
           setStatus({
             online: Boolean(data.model_loaded),
-            text: data.model_loaded ? "Space online" : "Space warming up",
+            text: data.model_loaded ? "Online" : "Warming up",
           });
         }
       })
@@ -655,7 +679,7 @@ export default function SiteRobot({ scopeRef }) {
         if (!cancelled) {
           setStatus({
             online: false,
-            text: "Space unreachable",
+            text: "Unreachable",
           });
         }
       });
@@ -735,6 +759,11 @@ export default function SiteRobot({ scopeRef }) {
               if (material.map) {
                 material.map.anisotropy = 4;
                 remapYellowTexture(material.map);
+              }
+
+              if (material.emissiveMap) {
+                material.emissiveMap.anisotropy = 4;
+                remapYellowTexture(material.emissiveMap);
               }
 
               if (material.color) {
@@ -1647,6 +1676,28 @@ export default function SiteRobot({ scopeRef }) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
+        let sawTerminalEvent = false;
+
+        const processEvent = (rawEvent) => {
+          rawEvent
+            .split("\n")
+            .filter((line) => line.startsWith("data: "))
+            .forEach((line) => {
+              const payload = JSON.parse(line.slice(6));
+              if (payload.type !== "intermediate" && payload.type !== "final") {
+                return;
+              }
+
+              setReplyText(payload.text);
+              streamingRef.current = payload.type !== "final";
+              sawTerminalEvent = sawTerminalEvent || payload.type === "final";
+              setStreamMeta({
+                step: payload.step || payload.total_steps || 0,
+                totalSteps: payload.total_steps || 0,
+                streaming: payload.type !== "final",
+              });
+            });
+        };
 
         while (true) {
           const { done, value } = await reader.read();
@@ -1654,33 +1705,29 @@ export default function SiteRobot({ scopeRef }) {
             break;
           }
 
-          buffer += decoder.decode(value, { stream: true });
+          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
           let boundary = buffer.indexOf("\n\n");
 
           while (boundary !== -1) {
             const rawEvent = buffer.slice(0, boundary);
             buffer = buffer.slice(boundary + 2);
-
-            rawEvent
-              .split("\n")
-              .filter((line) => line.startsWith("data: "))
-              .forEach((line) => {
-                const payload = JSON.parse(line.slice(6));
-                if (payload.type !== "intermediate" && payload.type !== "final") {
-                  return;
-                }
-
-                setReplyText(payload.text);
-                streamingRef.current = payload.type !== "final";
-                setStreamMeta({
-                  step: payload.step || payload.total_steps || 0,
-                  totalSteps: payload.total_steps || 0,
-                  streaming: payload.type !== "final",
-                });
-              });
+            processEvent(rawEvent);
 
             boundary = buffer.indexOf("\n\n");
           }
+        }
+
+        buffer += decoder.decode().replace(/\r\n/g, "\n");
+        if (buffer.trim()) {
+          processEvent(buffer.trim());
+        }
+
+        if (!sawTerminalEvent) {
+          streamingRef.current = false;
+          setStreamMeta((current) => ({
+            ...current,
+            streaming: false,
+          }));
         }
       } catch (requestError) {
         const wasAborted = requestError.name === "AbortError";
