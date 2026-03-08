@@ -1860,7 +1860,9 @@ export default function SiteRobot({ scopeRef }) {
     return <div ref={mountRef} className="site-robot site-robot--projects" />;
   }
 
-  const hasDialogue = Boolean(promptText || replyText || streamMeta.streaming);
+  const introText = "I am a 0.6B diffusion language model running on a CPU, so my replies will be slow and not always great :^)";
+  const showIntroDialogue = focusOpen && !promptText && !replyText && !streamMeta.streaming;
+  const hasDialogue = Boolean(promptText || replyText || streamMeta.streaming || showIntroDialogue);
   const showBubbleStack = chatOpen;
   const robotHeadViewport = showBubbleStack
     ? robotHeadOverlay
@@ -1914,7 +1916,7 @@ export default function SiteRobot({ scopeRef }) {
                   </span>
                 </div>
                 {promptText ? <div className="site-robot__prompt-label">{promptText}</div> : null}
-                <p>{replyText || "Ask Marvin something."}</p>
+                <p>{replyText || (showIntroDialogue ? introText : "Ask Marvin something.")}</p>
               </div>
             )}
 
