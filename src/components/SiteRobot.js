@@ -234,7 +234,27 @@ function resizeRenderer(renderer, camera, width, height) {
     return;
   }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const requestedPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  let safePixelRatio = requestedPixelRatio;
+
+  if (renderer.getContext) {
+    const gl = renderer.getContext();
+    if (gl) {
+      const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 0;
+      const maxRenderbufferSize = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) || 0;
+      const maxDimension = Math.min(
+        maxTextureSize || Number.POSITIVE_INFINITY,
+        maxRenderbufferSize || Number.POSITIVE_INFINITY
+      );
+
+      if (Number.isFinite(maxDimension) && maxDimension > 0) {
+        const limitedByDimension = (maxDimension * 0.94) / Math.max(width, height);
+        safePixelRatio = Math.min(requestedPixelRatio, limitedByDimension);
+      }
+    }
+  }
+
+  renderer.setPixelRatio(clamp(safePixelRatio, 0.5, requestedPixelRatio));
   renderer.setSize(width, height, false);
   camera.left = -width / 2;
   camera.right = width / 2;
@@ -765,6 +785,7 @@ export default function SiteRobot({ scopeRef }) {
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: true,
+      powerPreference: "high-performance",
     });
     renderer.setClearColor(0x000000, 0);
     renderer.domElement.className = "site-robot__webgl";
