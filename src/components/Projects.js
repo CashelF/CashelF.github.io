@@ -2,6 +2,7 @@ import { CodeIcon } from "@heroicons/react/solid";
 import React from "react";
 import { projects } from "../data";
 import BentoBox from "./BentoBox";
+import SiteRobot from "./SiteRobot";
 
 const bentoGridStyle = {
   display: 'grid',
@@ -20,6 +21,7 @@ const bentoGridStyleMobile = {
 export default function Projects() {
   const hostedProjects = projects.filter((project) => project.hosted);
   const otherProjects = projects.filter((project) => !project.hosted);
+  const scopeRef = React.useRef(null);
 
   const [isMobile, setIsMobile] = React.useState(false);
 
@@ -34,7 +36,11 @@ export default function Projects() {
 
   return (
     <section id="projects" className="text-gray-400 bg-transparent body-font">
-      <div className="container px-5 py-10 mx-auto text-center lg:px-40">
+      <div
+        ref={scopeRef}
+        className="container px-5 py-10 mx-auto text-center lg:px-40"
+        style={{ position: "relative" }}
+      >
         <div className="flex flex-col w-full mb-20">
           <CodeIcon className="mx-auto inline-block w-10 mb-4" />
           <h1 className="sm:text-4xl text-3xl font-medium title-font mb-4 text-white">
@@ -69,6 +75,7 @@ export default function Projects() {
             />
           ))}
         </div>
+        <SiteRobot scopeRef={scopeRef} />
       </div>
     </section>
   );

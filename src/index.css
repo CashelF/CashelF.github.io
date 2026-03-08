@@ -24,6 +24,39 @@ body {
     min-height: 100vh;
     margin: 0;
     color: var(--color-gray-300);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    a,
+    li,
+    label,
+    small,
+    strong,
+    em,
+    blockquote,
+    code,
+    pre
+) {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 /* Glassmorphism Utilities */

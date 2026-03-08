@@ -3,10 +3,6 @@
 import React from "react";
 
 export default function Contact() {
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [message, setMessage] = React.useState("");
-
   function handleSubmit(e) {
     e.preventDefault();
 
@@ -58,7 +54,7 @@ export default function Contact() {
               <h2 className="title-font font-semibold text-white tracking-widest text-xs">
                 EMAIL
               </h2>
-              <a className="text-gray-300 hover:text-white transition-colors leading-relaxed">
+              <a className="text-gray-300 hover:text-white transition-colors leading-relaxed" data-robot-target="Email link">
                 cashel@utexas.edu
               </a>
               <h2 className="title-font font-semibold text-white tracking-widest text-xs mt-4">
@@ -82,7 +78,7 @@ export default function Contact() {
             Hire Me
           </h2>
           <p className="leading-relaxed mb-5">
-            I am seeking summer internships in software engineering. Please reach out if you are interested in working with me!
+            I am looking for machine learning engineering roles. Please reach out if you are interested in working with me!
           </p>
           <div className="relative mb-4">
             <label htmlFor="name" className="leading-7 text-sm text-gray-400">
@@ -93,7 +89,6 @@ export default function Contact() {
               id="name"
               name="name"
               className="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-white focus:ring-2 focus:ring-gray-600 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out glass"
-              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div className="relative mb-4">
@@ -105,7 +100,6 @@ export default function Contact() {
               id="email"
               name="email"
               className="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-white focus:ring-2 focus:ring-gray-600 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out glass"
-              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="relative mb-4">
@@ -118,11 +112,11 @@ export default function Contact() {
               id="message"
               name="message"
               className="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-white focus:ring-2 focus:ring-gray-600 h-32 text-base outline-none text-gray-100 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out glass"
-              onChange={(e) => setMessage(e.target.value)}
             />
           </div>
           <button
             type="submit"
+            data-robot-target="Contact submit button"
             className="text-black bg-white border border-white py-2 px-6 focus:outline-none hover:bg-gray-200 hover:border-gray-200 rounded text-lg transition-colors">
             Submit
           </button>

@@ -92,6 +92,8 @@ export default function BentoBox({ project }) {
       href={project.link}
       target="_blank"
       rel="noreferrer"
+      className="robot-play-target"
+      data-robot-target={project.title}
       style={{ ...styles.bentoBox, ...hoverStyles }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

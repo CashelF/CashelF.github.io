@@ -17,11 +17,13 @@ export default function About() {
           <div className="flex justify-center">
             <a
               href="#contact"
+              data-robot-target="Work With Me button"
               className="inline-flex text-black bg-white border border-white py-2 px-6 focus:outline-none hover:bg-gray-200 hover:border-gray-200 rounded text-lg shadow-lg transition-colors">
               Work With Me
             </a>
             <a
               href="#projects"
+              data-robot-target="Past Work button"
               className="ml-4 inline-flex text-gray-300 bg-transparent border border-gray-600 py-2 px-6 focus:outline-none hover:border-white hover:text-white rounded text-lg transition-colors">
               See My Past Work
             </a>
@@ -32,6 +34,7 @@ export default function About() {
             className="object-cover object-center rounded"
             alt="hero"
             src="./cashel_animated.png"
+            data-robot-target="Hero portrait"
           />
         </div>
       </div>
