@@ -48,8 +48,8 @@ export default function NeuralNetworkBackground() {
     resize();
     window.addEventListener('resize', resize);
 
-    const nodeCount = Math.min(60, Math.max(30, Math.floor((canvas.width * canvas.height) / 20000)));
-    
+    const nodeCount = Math.min(12, Math.max(12, Math.floor((canvas.width * canvas.height) / 48000)));
+
     for (let i = 0; i < nodeCount; i++) {
       nodes.push(new Node(
         Math.random() * canvas.width,
@@ -77,7 +77,7 @@ export default function NeuralNetworkBackground() {
     window.addEventListener('click', handleClick);
     window.addEventListener('mousemove', handleMouseMove);
 
-    const connectionDistance = 180;
+    const connectionDistance = 360;
     const mouseConnectionDistance = 200;
 
     const animate = () => {
@@ -95,7 +95,7 @@ export default function NeuralNetworkBackground() {
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < mouseConnectionDistance) {
-            const opacity = (1 - distance / mouseConnectionDistance) * 0.4 * node.opacity;
+            const opacity = (1 - distance / mouseConnectionDistance) * 0.6 * node.opacity;
             ctx.beginPath();
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(mouse.x, mouse.y);
@@ -113,8 +113,8 @@ export default function NeuralNetworkBackground() {
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < connectionDistance) {
-            const opacity = (1 - distance / connectionDistance) * 0.25 * 
-                           Math.min(nodes[i].opacity, nodes[j].opacity);
+            const opacity = (1 - distance / connectionDistance) * 0.6 *
+              Math.min(nodes[i].opacity, nodes[j].opacity);
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);

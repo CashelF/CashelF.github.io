@@ -140,8 +140,13 @@ function getCardGeometry(scopeElement) {
   }
 
   const scopeRect = scopeElement.getBoundingClientRect();
+  const priorityElements = Array.from(scopeElement.querySelectorAll(".robot-play-target"));
+  const secondaryElements = Array.from(
+    scopeElement.querySelectorAll("[data-robot-target]:not(.robot-play-target)")
+  );
 
-  return Array.from(scopeElement.querySelectorAll(".robot-play-target, [data-robot-target]"))
+  return priorityElements
+    .concat(secondaryElements)
     .map((element) => {
       const rect = element.getBoundingClientRect();
       return {
@@ -155,6 +160,24 @@ function getCardGeometry(scopeElement) {
       };
     })
     .filter((card) => card.width >= 28 && card.height >= 16);
+}
+
+function getScopeLayoutMetrics(scopeElement) {
+  if (!scopeElement) {
+    return { width: 0, height: 0 };
+  }
+
+  const rect = scopeElement.getBoundingClientRect();
+  return {
+    width: Math.ceil(rect.width || scopeElement.clientWidth || 0),
+    height: Math.ceil(
+      Math.max(
+        rect.height || 0,
+        scopeElement.scrollHeight || 0,
+        scopeElement.offsetHeight || 0
+      )
+    ),
+  };
 }
 
 function getStandingPoint(card, preferredX) {
@@ -188,6 +211,21 @@ function clampPoseToLayout(pose, layout) {
   return {
     x: clamp(pose.x, 28, Math.max(28, layout.width - 28)),
     y: clamp(pose.y, 24, Math.max(24, layout.height - 12)),
+  };
+}
+
+function wrapCoordinate(value, size) {
+  if (!size) {
+    return value;
+  }
+
+  return ((value % size) + size) % size;
+}
+
+function wrapPoseToLayout(pose, layout) {
+  return {
+    x: wrapCoordinate(pose.x, layout.width || 1),
+    y: wrapCoordinate(pose.y, layout.height || 1),
   };
 }
 
@@ -349,60 +387,52 @@ function getNearestCardIndex(cards, pose) {
   return bestIndex;
 }
 
-function getLandingCardIndex(cards, x) {
+function getSurfaceBelow(cards, pose, layoutHeight) {
   if (!cards.length) {
-    return 0;
-  }
-
-  let bestIndex = 0;
-  let bestScore = Infinity;
-
-  cards.forEach((card, index) => {
-    const center = (card.left + card.right) / 2;
-    const horizontalGap =
-      x < card.left ? card.left - x : x > card.right ? x - card.right : 0;
-    const score = horizontalGap * 3.2 + Math.abs(center - x);
-
-    if (score < bestScore) {
-      bestScore = score;
-      bestIndex = index;
-    }
-  });
-
-  return bestIndex;
-}
-
-function getSurfaceBelowIndex(cards, pose) {
-  if (!cards.length) {
-    return 0;
+    return null;
   }
 
   const overshootAllowance = 24;
+  const horizontalLandingMargin = 18;
   const candidates = cards
     .map((card, index) => {
-      const horizontalGap =
-        pose.x < card.left ? card.left - pose.x : pose.x > card.right ? pose.x - card.right : 0;
+      let downwardDelta = card.top - pose.y;
+      if (downwardDelta < -overshootAllowance) {
+        downwardDelta += layoutHeight;
+      }
 
       return {
         card,
         index,
-        horizontalGap,
-        verticalDelta: card.top - pose.y,
+        downwardDelta,
       };
     })
-    .filter((item) => item.verticalDelta >= -overshootAllowance);
+    .filter(
+      (item) =>
+        pose.x >= item.card.left - horizontalLandingMargin &&
+        pose.x <= item.card.right + horizontalLandingMargin
+    );
 
   if (!candidates.length) {
-    return getLandingCardIndex(cards, pose.x);
+    return null;
   }
 
   candidates.sort((left, right) => {
-    const leftScore = left.horizontalGap * 4.4 + Math.max(0, left.verticalDelta) * 1.35;
-    const rightScore = right.horizontalGap * 4.4 + Math.max(0, right.verticalDelta) * 1.35;
-    return leftScore - rightScore;
+    return left.downwardDelta - right.downwardDelta;
   });
 
-  return candidates[0].index;
+  const nextSurface = candidates[0];
+  if (!nextSurface) {
+    return null;
+  }
+
+  return {
+    card: nextSurface.card,
+    index: nextSurface.index,
+    point: getStandingPoint(nextSurface.card, pose.x),
+    downwardDelta: nextSurface.downwardDelta,
+    overshootAllowance,
+  };
 }
 
 function getViewportSize() {
@@ -474,6 +504,32 @@ function getRobotHeadViewport(scopeElement, pose) {
   return {
     x: scopeRect.left + pose.x + UI_ANCHOR_OFFSET.x + ROBOT_HEAD.x,
     y: scopeRect.top + pose.y + UI_ANCHOR_OFFSET.y + ROBOT_HEAD.y,
+  };
+}
+
+function getRobotHeadLayout(pose) {
+  return {
+    x: pose.x + UI_ANCHOR_OFFSET.x + ROBOT_HEAD.x,
+    y: pose.y + UI_ANCHOR_OFFSET.y + ROBOT_HEAD.y,
+  };
+}
+
+function getPoseFromHeadLayout(headLayout) {
+  return {
+    x: headLayout.x - UI_ANCHOR_OFFSET.x - ROBOT_HEAD.x,
+    y: headLayout.y - UI_ANCHOR_OFFSET.y - ROBOT_HEAD.y,
+  };
+}
+
+function getLayoutPointFromViewport(scopeElement, viewportPoint) {
+  if (!scopeElement) {
+    return viewportPoint;
+  }
+
+  const scopeRect = scopeElement.getBoundingClientRect();
+  return {
+    x: viewportPoint.x - scopeRect.left,
+    y: viewportPoint.y - scopeRect.top,
   };
 }
 
@@ -614,8 +670,7 @@ export default function SiteRobot({ scopeRef }) {
       return;
     }
 
-    const width = scopeElement.clientWidth;
-    const height = Math.ceil(scopeElement.getBoundingClientRect().height);
+    const { width, height } = getScopeLayoutMetrics(scopeElement);
     cardsRef.current = getCardGeometry(scopeElement);
     layoutRef.current = { width, height };
 
@@ -635,6 +690,19 @@ export default function SiteRobot({ scopeRef }) {
       motionRef.current.nextActionAt = performance.now() + 2600;
       setVisible(true);
     }
+  }, [scopeRef]);
+
+  const syncLayoutBounds = React.useCallback(() => {
+    const scopeElement = scopeRef && scopeRef.current;
+    if (!scopeElement) {
+      return;
+    }
+
+    const { width, height } = getScopeLayoutMetrics(scopeElement);
+    layoutRef.current = {
+      width: width || layoutRef.current.width,
+      height: height || layoutRef.current.height,
+    };
   }, [scopeRef]);
 
   React.useEffect(() => {
@@ -843,24 +911,47 @@ export default function SiteRobot({ scopeRef }) {
   React.useEffect(() => {
     measureLayout();
 
-    const handleUpdate = () => measureLayout();
+    let resizeScheduled = false;
+    let scrollScheduled = false;
+    const handleResize = () => {
+      if (resizeScheduled) {
+        return;
+      }
+      resizeScheduled = true;
+      window.requestAnimationFrame(() => {
+        resizeScheduled = false;
+        measureLayout();
+      });
+    };
+    const handleScroll = () => {
+      if (scrollScheduled) {
+        return;
+      }
+      scrollScheduled = true;
+      window.requestAnimationFrame(() => {
+        scrollScheduled = false;
+        syncLayoutBounds();
+      });
+    };
     const observer = window.ResizeObserver && scopeRef && scopeRef.current
-      ? new window.ResizeObserver(handleUpdate)
+      ? new window.ResizeObserver(handleResize)
       : null;
 
     if (observer && scopeRef.current) {
       observer.observe(scopeRef.current);
     }
 
-    window.addEventListener("resize", handleUpdate);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       if (observer) {
         observer.disconnect();
       }
-      window.removeEventListener("resize", handleUpdate);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [measureLayout, scopeRef]);
+  }, [measureLayout, scopeRef, syncLayoutBounds]);
 
   React.useEffect(() => {
     if (focusOpen && inputRef.current) {
@@ -965,7 +1056,7 @@ export default function SiteRobot({ scopeRef }) {
         x: event.clientX + robotDrag.offsetX,
         y: event.clientY + robotDrag.offsetY,
       };
-      const nextPose = clampPoseToLayout({
+      const nextPose = wrapPoseToLayout({
         ...getPoseFromHeadViewport(scopeRef && scopeRef.current, nextHead),
         facingLeft: event.clientX < robotDrag.startX,
         visible: true,
@@ -1296,26 +1387,31 @@ export default function SiteRobot({ scopeRef }) {
       } else if (motion.mode === "held") {
         fadeToAction(actionMap, activeActionRef, "idle", actionSpeedMap);
       } else if (motion.mode === "dangling") {
-        const nextHead = {
-          x: headViewport.x + motion.velocityX * (dt / 16),
-          y: headViewport.y + motion.velocityY * (dt / 16),
+        const currentHeadLayout = getRobotHeadLayout(poseRef.current);
+        const currentPanelAnchorLayout = getLayoutPointFromViewport(
+          scopeRef && scopeRef.current,
+          currentPanelAnchor
+        );
+        const nextHeadLayout = {
+          x: currentHeadLayout.x + motion.velocityX * (dt / 16),
+          y: currentHeadLayout.y + motion.velocityY * (dt / 16),
         };
 
         motion.velocityY += 0.12 * (dt / 16);
         motion.velocityX *= motion.dragActive ? 0.94 : 0.985;
         motion.velocityY *= motion.dragActive ? 0.94 : 0.99;
 
-        const tetherDx = nextHead.x - currentPanelAnchor.x;
-        const tetherDy = nextHead.y - currentPanelAnchor.y;
+        const tetherDx = nextHeadLayout.x - currentPanelAnchorLayout.x;
+        const tetherDy = nextHeadLayout.y - currentPanelAnchorLayout.y;
         const tetherDistance = Math.hypot(tetherDx, tetherDy) || 1;
-        let constrainedHead = nextHead;
+        let constrainedHeadLayout = nextHeadLayout;
 
         if (tetherDistance > MAX_TETHER_LENGTH) {
           const unitX = tetherDx / tetherDistance;
           const unitY = tetherDy / tetherDistance;
-          constrainedHead = {
-            x: currentPanelAnchor.x + unitX * MAX_TETHER_LENGTH,
-            y: currentPanelAnchor.y + unitY * MAX_TETHER_LENGTH,
+          constrainedHeadLayout = {
+            x: currentPanelAnchorLayout.x + unitX * MAX_TETHER_LENGTH,
+            y: currentPanelAnchorLayout.y + unitY * MAX_TETHER_LENGTH,
           };
 
           const radialVelocity = motion.velocityX * unitX + motion.velocityY * unitY;
@@ -1325,25 +1421,29 @@ export default function SiteRobot({ scopeRef }) {
           }
         }
 
-        const danglingPose = clampPoseToLayout({
-          ...getPoseFromHeadViewport(scopeRef && scopeRef.current, constrainedHead),
-          facingLeft: currentPanelAnchor.x < constrainedHead.x,
+        const danglingPose = wrapPoseToLayout({
+          ...getPoseFromHeadLayout(constrainedHeadLayout),
+          facingLeft: currentPanelAnchorLayout.x < constrainedHeadLayout.x,
           visible: true,
         }, layoutRef.current);
 
         poseRef.current = {
           ...poseRef.current,
           ...danglingPose,
-          facingLeft: currentPanelAnchor.x < constrainedHead.x,
+          facingLeft: currentPanelAnchorLayout.x < constrainedHeadLayout.x,
           visible: true,
         };
 
         if (!motion.dragActive) {
-          const landingIndex = getSurfaceBelowIndex(cardsRef.current, poseRef.current);
-          const landingCard = cardsRef.current[landingIndex];
-          const landingPoint = getStandingPoint(landingCard, poseRef.current.x);
+          const nextSurface = getSurfaceBelow(
+            cardsRef.current,
+            poseRef.current,
+            layoutRef.current.height
+          );
+          const landingIndex = nextSurface ? nextSurface.index : null;
+          const landingPoint = nextSurface ? nextSurface.point : null;
 
-          if (poseRef.current.y >= landingPoint.y) {
+          if (landingPoint && nextSurface.downwardDelta <= nextSurface.overshootAllowance) {
             const landedPose = clampPoseToLayout({
               x: landingPoint.x,
               y: landingPoint.y,
@@ -1370,17 +1470,18 @@ export default function SiteRobot({ scopeRef }) {
 
         fadeToAction(actionMap, activeActionRef, "idle", actionSpeedMap);
       } else if (motion.mode === "falling") {
-        const nextHead = {
-          x: headViewport.x + motion.velocityX * (dt / 16),
-          y: headViewport.y + motion.velocityY * (dt / 16),
+        const currentHeadLayout = getRobotHeadLayout(poseRef.current);
+        const nextHeadLayout = {
+          x: currentHeadLayout.x + motion.velocityX * (dt / 16),
+          y: currentHeadLayout.y + motion.velocityY * (dt / 16),
         };
 
         motion.velocityY += 0.18 * (dt / 16);
         motion.velocityX *= 0.992;
         motion.velocityY *= 0.998;
 
-        const fallingPose = clampPoseToLayout({
-          ...getPoseFromHeadViewport(scopeRef && scopeRef.current, nextHead),
+        const fallingPose = wrapPoseToLayout({
+          ...getPoseFromHeadLayout(nextHeadLayout),
           facingLeft: motion.velocityX < 0,
           visible: true,
         }, layoutRef.current);
@@ -1392,11 +1493,15 @@ export default function SiteRobot({ scopeRef }) {
           visible: true,
         };
 
-        const landingIndex = getSurfaceBelowIndex(cardsRef.current, poseRef.current);
-        const landingCard = cardsRef.current[landingIndex];
-        const landingPoint = getStandingPoint(landingCard, poseRef.current.x);
+        const nextSurface = getSurfaceBelow(
+          cardsRef.current,
+          poseRef.current,
+          layoutRef.current.height
+        );
+        const landingIndex = nextSurface ? nextSurface.index : null;
+        const landingPoint = nextSurface ? nextSurface.point : null;
 
-        if (poseRef.current.y >= landingPoint.y) {
+        if (landingPoint && nextSurface.downwardDelta <= nextSurface.overshootAllowance) {
           const landedPose = clampPoseToLayout({
             x: landingPoint.x,
             y: landingPoint.y,
@@ -1451,11 +1556,8 @@ export default function SiteRobot({ scopeRef }) {
       const danglingPitch = isDangling
         ? clamp((currentPanelAnchor.y - headViewport.y - 140) / 420, -0.08, 0.14)
         : 0;
-      characterPivot.position.set(
-        poseRef.current.x - width / 2,
-        height / 2 - poseRef.current.y,
-        0
-      );
+      const baseYawPositionX = poseRef.current.x - width / 2;
+      const baseYawPositionY = height / 2 - poseRef.current.y;
       const desiredYaw = isLocomoting
         ? poseRef.current.facingLeft
           ? -Math.PI / 2
@@ -1486,6 +1588,7 @@ export default function SiteRobot({ scopeRef }) {
       }
 
       setBubbleSide(poseRef.current.x > width * 0.58 ? "left" : "right");
+      characterPivot.position.set(baseYawPositionX, baseYawPositionY, 0);
       renderer.render(scene, camera);
       frameId = window.requestAnimationFrame(animate);
     };
