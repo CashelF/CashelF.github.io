@@ -1,6 +1,9 @@
 {
-    "name": "Cashel's Portfolio",
-    "short_name": "Portfolio",
+    "name": "Cash — Machine Learning Engineer",
+    "short_name": "Cash",
+    "description": "Cash’s selected work, building Zomma, and Marvin’s live diffusion model.",
+    "id": "/",
+    "lang": "en",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -13,8 +16,9 @@
             "type": "image/png"
         }
     ],
-    "start_url": ".",
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "start_url": "/",
+    "scope": "/",
+    "theme_color": "#f6f5f1",
+    "background_color": "#f6f5f1",
     "display": "standalone"
 }
