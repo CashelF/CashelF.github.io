@@ -15,7 +15,7 @@
   },
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build -b gh-pages",
+    "deploy": "node scripts/deploy.js",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",

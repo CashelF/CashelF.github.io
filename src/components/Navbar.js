@@ -1,33 +1,41 @@
-// src/components/Navbar.js
-
-import { ArrowRightIcon } from "@heroicons/react/solid";
 import React from "react";
-
+import { useTheme } from "../siteTheme";
 export default function Navbar() {
+  const { theme, toggleTheme } = useTheme();
+  const dark = theme === "dark";
   return (
-    <header className="bg-black bg-opacity-80 glass md:sticky top-0 z-10 transition-all duration-300">
-      <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-        <a className="title-font font-medium text-white mb-4 md:mb-0">
-          <a href="#about" className="ml-3 text-xl" data-robot-target="Site title">
-            Cashel Fitzgerald
-          </a>
+    <header className="site-header page-width">
+      <a
+        href="#about"
+        className="wordmark"
+        aria-label="Cashel Fitzgerald, home"
+      >
+        cf<span>.</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#brain">Marvin’s brain</a>
+        <a href="#projects">Work</a>
+        <a href="#contact">
+          Say hello <span aria-hidden="true">↗</span>
         </a>
-        <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-700	flex flex-wrap items-center text-base justify-center">
-          <a href="#projects" className="mr-5 hover:text-white transition-colors" data-robot-target="Past Work nav link">
-            Past Work
-          </a>
-          <a href="#skills" className="mr-5 hover:text-white transition-colors" data-robot-target="Skills nav link">
-            Skills
-          </a>
-        </nav>
-        <a
-          href="#contact"
-          data-robot-target="Hire Me button"
-          className="inline-flex items-center bg-white border border-white py-1 px-3 focus:outline-none hover:bg-black hover:text-white rounded text-base mt-4 md:mt-0 text-black shadow-lg transition-colors">
-          Hire Me
-          <ArrowRightIcon className="w-4 h-4 ml-1" />
-        </a>
-      </div>
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={toggleTheme}
+          aria-label={dark ? "Switch to day mode" : "Switch to night mode"}
+          aria-pressed={dark}
+          title={dark ? "Day mode" : "Night mode"}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {dark ? (
+              <React.Fragment>
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+              </React.Fragment>
+            ) : <path d="M20.7 13.2A9 9 0 0 1 10.8 3.3 9 9 0 1 0 20.7 13.2Z" />}
+          </svg>
+        </button>
+      </nav>
     </header>
   );
 }

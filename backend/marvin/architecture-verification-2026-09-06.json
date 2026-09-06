@@ -1,0 +1,202 @@
+{
+  "passed": true,
+  "commit": "dd8e9d6af19cc2c255966f7828592301a53d5f2f",
+  "base": "https://cashel-diffusion-chatbot.hf.space",
+  "runtime_files": [
+    {
+      "name": "app.py",
+      "bytes": 25877,
+      "sha256": "4a0c1febbd5f7dd36d3ac6de8f1bba315bb9df84eda566efae8614e9df483157",
+      "matches_local": true
+    },
+    {
+      "name": "request_queue.py",
+      "bytes": 10931,
+      "sha256": "477e97a48be2f0070cd1ea2d98619c8a57f5c071137a5aa11dbcc1834a2e9b99",
+      "matches_local": true
+    },
+    {
+      "name": "telemetry.py",
+      "bytes": 16794,
+      "sha256": "3148a847e1d1231804a822b3076269a756302cf7b6e36b3d96d7bb6ee293d6a7",
+      "matches_local": true
+    },
+    {
+      "name": "modeling_qwen3.py",
+      "bytes": 6719,
+      "sha256": "5ce02d89c8c3edbcefd83757b2a824e0e07bb8c85d3f966766959bf8d89adc9b",
+      "matches_local": true
+    },
+    {
+      "name": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "matches_local": true
+    },
+    {
+      "name": "requirements.txt",
+      "bytes": 90,
+      "sha256": "d428786719f912811a263c9db9c9602d6deeb351d6c8aeed0eb70982be4313cf",
+      "matches_local": true
+    },
+    {
+      "name": "Dockerfile",
+      "bytes": 428,
+      "sha256": "71c04d91444a7991c870e3ffacaad851eadddee12e9488bd80247a33630bc461",
+      "matches_local": true
+    }
+  ],
+  "measured_frames": 8,
+  "event_times": [
+    {
+      "type": "start",
+      "step": null,
+      "seconds": 0.204
+    },
+    {
+      "type": "intermediate",
+      "step": 1,
+      "seconds": 2.042
+    },
+    {
+      "type": "intermediate",
+      "step": 2,
+      "seconds": 2.325
+    },
+    {
+      "type": "intermediate",
+      "step": 3,
+      "seconds": 2.862
+    },
+    {
+      "type": "intermediate",
+      "step": 4,
+      "seconds": 3.477
+    },
+    {
+      "type": "intermediate",
+      "step": 5,
+      "seconds": 4.093
+    },
+    {
+      "type": "intermediate",
+      "step": 6,
+      "seconds": 4.601
+    },
+    {
+      "type": "intermediate",
+      "step": 7,
+      "seconds": 5.53
+    },
+    {
+      "type": "intermediate",
+      "step": 8,
+      "seconds": 5.729
+    },
+    {
+      "type": "final",
+      "step": 8,
+      "seconds": 5.729
+    }
+  ],
+  "checks": {
+    "all_stages_finite_and_aligned": true,
+    "all_28_layers": true,
+    "qkv_shapes_16_8_8": true,
+    "sampled_vocabulary_columns_64": true,
+    "all_steps_consecutive": true,
+    "final_matches_last_frame": true,
+    "own_request_finished": true,
+    "runtime_files_identical": true
+  },
+  "date": "2026-09-06",
+  "backend_tests": 75,
+  "frontend_tests": 35,
+  "cpu_benchmark": {
+    "model": "dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+    "revision": "60f77bba67ba94231c16f5fb29bc66c500b038f1",
+    "device": "local CPU",
+    "torch": "2.13.0+cu130",
+    "threads": 2,
+    "dtype": "bfloat16",
+    "active_tokens": 32,
+    "prefix_tokens": 0,
+    "repetitions": 7,
+    "warmups": 2,
+    "all_logits_exactly_equal": true,
+    "all_hooks_cleaned": true,
+    "milliseconds": {
+      "baseline": [
+        78.276,
+        69.097,
+        69.454,
+        69.783,
+        69.817,
+        69.96,
+        69.769
+      ],
+      "previous": [
+        82.569,
+        74.258,
+        74.755,
+        74.719,
+        74.92,
+        74.742,
+        74.766
+      ],
+      "expanded": [
+        78.48,
+        78.701,
+        79.094,
+        78.61,
+        78.739,
+        78.408,
+        78.848
+      ]
+    },
+    "median_ms": {
+      "baseline": 69.783,
+      "previous": 74.755,
+      "expanded": 78.701
+    },
+    "added_vs_previous_ms": 3.946,
+    "added_vs_previous_percent": 5.28,
+    "frame_bytes": 74214,
+    "capability": {
+      "available": true,
+      "version": 1,
+      "metric": "hidden_state_rms",
+      "layer_count": 28,
+      "max_tokens": 32,
+      "token_states": true,
+      "internals": true,
+      "qkv": true,
+      "stages": [
+        "embeddingRms",
+        "finalNormRms",
+        "lmHeadRms"
+      ],
+      "architecture": null
+    },
+    "stage_widths": {
+      "embeddingRms": 32,
+      "finalNormRms": 32,
+      "lmHeadRms": 32,
+      "lmHeadTokenIndices": 64
+    },
+    "qkv_shapes": {
+      "queryHeadRms": [
+        28,
+        16
+      ],
+      "keyHeadRms": [
+        28,
+        8
+      ],
+      "valueHeadRms": [
+        28,
+        8
+      ]
+    }
+  }
+}

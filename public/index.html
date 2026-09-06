@@ -2,44 +2,73 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Cashel's portfolio webapp"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
+    <meta name="theme-color" content="#f6f5f1" />
+    <script>
+      (function () {
+        var saved;
+        try { saved = localStorage.getItem("cash-theme"); } catch (error) {}
+        var dark = saved === "dark" || (saved !== "light" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        document.querySelector('meta[name="theme-color"]').content = dark ? "#181c19" : "#f6f5f1";
+      })();
+    </script>
+    <title>Cash — Machine Learning Engineer</title>
+    <meta name="description" content="Cash (Cashel Fitzgerald), machine learning engineer and co-founder &amp; CTO at Zomma. Selected work and a live look inside Marvin, a diffusion language model." />
+    <meta name="author" content="Cashel Fitzgerald" />
+    <link rel="canonical" href="https://cashel.dev/" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico?v=2" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png?v=2" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png?v=2" />
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png?v=2" />
+    <meta name="apple-mobile-web-app-title" content="Cash" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Cashel's Portfolio</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Cash" />
+    <meta property="og:title" content="Cash — Machine Learning Engineer" />
+    <meta property="og:description" content="Building Zomma. Selected work and a live look inside Marvin, a diffusion language model." />
+    <meta property="og:url" content="https://cashel.dev/" />
+    <meta property="og:image" content="https://cashel.dev/social-card.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hi, I’m Cash. A machine learning engineer. Building Zomma. Illustrated portrait of Cashel Fitzgerald." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cash — Machine Learning Engineer" />
+    <meta name="twitter:description" content="Building Zomma. Selected work and a live look inside Marvin, a diffusion language model." />
+    <meta name="twitter:image" content="https://cashel.dev/social-card.png" />
+    <meta name="twitter:image:alt" content="Hi, I’m Cash. A machine learning engineer. Building Zomma. Illustrated portrait of Cashel Fitzgerald." />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "url": "https://cashel.dev/",
+        "name": "Cash — Machine Learning Engineer",
+        "mainEntity": {
+          "@type": "Person",
+          "name": "Cashel Fitzgerald",
+          "alternateName": "Cash",
+          "url": "https://cashel.dev/",
+          "image": "https://cashel.dev/cashel_animated.png",
+          "jobTitle": "Machine Learning Engineer, Co-founder & CTO",
+          "worksFor": {
+            "@type": "Organization",
+            "name": "Zomma",
+            "url": "https://www.zommalabs.com/"
+          },
+          "sameAs": [
+            "https://github.com/CashelF",
+            "https://www.linkedin.com/in/cashelfitzgerald"
+          ]
+        }
+      }
+    </script>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-  
-      
+    <noscript>Hi, I’m Cash — a machine learning engineer and co-founder &amp; CTO at Zomma. Enable JavaScript to explore my work and meet Marvin. <a href="https://www.zommalabs.com/">Visit Zomma</a>.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>

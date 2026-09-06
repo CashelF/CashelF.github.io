@@ -1,78 +1,66 @@
-import { CodeIcon } from "@heroicons/react/solid";
 import React from "react";
-import { projects } from "../data";
-import BentoBox from "./BentoBox";
-
-const bentoGridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '1.25rem',
-  padding: '1rem 0',
-};
-
-const bentoGridStyleMobile = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  gap: '0.75rem',
-  padding: '0.75rem 0',
-};
-
+import { projects, archiveProjects } from "../data";
 export default function Projects() {
-  const hostedProjects = projects.filter((project) => project.hosted);
-  const otherProjects = projects.filter((project) => !project.hosted);
-
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const gridStyle = isMobile ? bentoGridStyleMobile : bentoGridStyle;
-
   return (
-    <section id="projects" className="text-gray-400 bg-transparent body-font">
-      <div
-        className="container px-5 py-10 mx-auto text-center lg:px-40"
-        style={{ position: "relative" }}
-      >
-        <div className="flex flex-col w-full mb-20">
-          <CodeIcon className="mx-auto inline-block w-10 mb-4" />
-          <h1 className="sm:text-4xl text-3xl font-medium title-font mb-4 text-white">
-            Hosted Projects
-          </h1>
-          <p className="lg:w-2/3 mx-auto leading-relaxed text-base">
-            These projects are live and hosted online. Check them out!
-          </p>
+    <section id="projects" className="work-section page-width">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">02 / SELECTED WORK</p>
+          <h2>A few things I’ve made.</h2>
         </div>
-        <div style={gridStyle}>
-          {hostedProjects.map((project) => (
-            <BentoBox
-              key={project.title}
-              project={project}
-            />
-          ))}
-        </div>
-
-        <div className="flex flex-col w-full mb-20 mt-20">
-          <h1 className="sm:text-4xl text-3xl font-medium title-font mb-4 text-white">
-            Other Projects
-          </h1>
-          <p className="lg:w-2/3 mx-auto leading-relaxed text-base">
-            These are some other projects that I have worked on.
-          </p>
-        </div>
-        <div style={gridStyle}>
-          {otherProjects.map((project) => (
-            <BentoBox
-              key={project.title}
-              project={project}
-            />
-          ))}
-        </div>
+        <a
+          className="text-link"
+          href="https://github.com/CashelF"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
       </div>
+      <div className="project-grid">
+        {projects.map((project, index) => (
+          <a
+            className="project robot-play-target"
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            key={project.title}
+            data-robot-target={project.title}
+          >
+            <div className={`project-image project-image--${index}`}>
+              <img src={project.thumbnail} alt="" loading="lazy" />
+              <span className="project-open" aria-hidden="true">
+                ↗
+              </span>
+            </div>
+            <div className="project-heading">
+              <h3>{project.title}</h3>
+              <span>{project.category}</span>
+            </div>
+            <p>{project.description}</p>
+          </a>
+        ))}
+      </div>
+      <details className="project-archive">
+        <summary>
+          More experiments <span aria-hidden="true">+</span>
+        </summary>
+        <div className="archive-list">
+          {archiveProjects.map((project) => (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={project.title}
+            >
+              <span>{project.title}</span>
+              <span>
+                {project.category} <span aria-hidden="true">↗</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </details>
     </section>
   );
 }

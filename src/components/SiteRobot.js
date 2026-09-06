@@ -1,6 +1,11 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import * as THREE from "three/build/three";
-import { projects, skills } from "../data";
+import { getRobotSurfaces } from "../robotSurfaces";
+import {
+  useMarvin, generateMarvin, stopMarvin, registerMarvinSurface,
+  setMarvinSurfaceEnabled, engageMarvinSurface, QUEUED_MESSAGE, marvinQueuePosition,
+} from "../marvinStream";
 import "../styles/SiteRobot.css";
 
 if (typeof window !== "undefined") {
@@ -8,7 +13,6 @@ if (typeof window !== "undefined") {
   require("three/examples/js/loaders/GLTFLoader");
 }
 
-const SPACE_URL = "https://cashel-diffusion-chatbot.hf.space";
 const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const MODEL_URL = `${process.env.PUBLIC_URL || ""}/models/marvin/Animated Robot.glb`;
 const MODEL_BASE_YAW = -0.58;
@@ -17,20 +21,6 @@ const UI_ANCHOR_OFFSET = { x: -18, y: -72 };
 const MAX_TETHER_LENGTH = 196;
 const ROBOT_DRAG_THRESHOLD = 7;
 const MARVIN_ACCENT_DARK = new THREE.Color(0x3f3f46);
-
-const hostedProjects = projects.filter((project) => project.hosted).map((project) => project.title);
-const otherProjects = projects.filter((project) => !project.hosted).map((project) => project.title);
-const SYSTEM_PROMPT = [
-  "You are Marvin, a polished little robot guide on Cashel Fitzgerald's portfolio website.",
-  "You are playful, concise, and technically sharp.",
-  "You are demonstrating a diffusion language model, so when relevant mention that your answer settles over denoising steps instead of appearing left-to-right.",
-  "Only claim details grounded in this portfolio context.",
-  "Bio: Cashel Fitzgerald is a Cornell CS Master's student, previously studied ECE at UT Austin, and works as a machine learning engineer focused on distributed training, computer vision, and production ML systems.",
-  `Hosted projects on the site: ${hostedProjects.join(", ")}.`,
-  `Other projects listed: ${otherProjects.join(", ")}.`,
-  `Skills listed: ${skills.join(", ")}.`,
-  "If something is outside the provided context, say so clearly.",
-].join(" ");
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -132,56 +122,6 @@ function remapYellowTexture(texture) {
   texture.image = canvas;
   texture.userData.marvinYellowRemapped = true;
   texture.needsUpdate = true;
-}
-
-function hasStickyOrFixedAncestor(element, scopeElement) {
-  if (typeof window === "undefined" || !element) {
-    return false;
-  }
-
-  let current = element;
-  while (current && current !== scopeElement && current instanceof window.HTMLElement) {
-    const position = window.getComputedStyle(current).position;
-    if (position === "sticky" || position === "fixed") {
-      return true;
-    }
-    current = current.parentElement;
-  }
-
-  return false;
-}
-
-function getCardGeometry(scopeElement) {
-  if (!scopeElement) {
-    return [];
-  }
-
-  const scopeRect = scopeElement.getBoundingClientRect();
-  const priorityElements = Array.from(scopeElement.querySelectorAll(".robot-play-target"));
-  const secondaryElements = Array.from(
-    scopeElement.querySelectorAll("[data-robot-target]:not(.robot-play-target)")
-  );
-
-  return priorityElements
-    .concat(secondaryElements)
-    .map((element) => {
-      if (hasStickyOrFixedAncestor(element, scopeElement)) {
-        return null;
-      }
-
-      const rect = element.getBoundingClientRect();
-      return {
-        element,
-        left: rect.left - scopeRect.left,
-        right: rect.right - scopeRect.left,
-        top: rect.top - scopeRect.top,
-        bottom: rect.bottom - scopeRect.top,
-        width: rect.width,
-        height: rect.height,
-      };
-    })
-    .filter(Boolean)
-    .filter((card) => card.width >= 28 && card.height >= 16);
 }
 
 function getScopeLayoutMetrics(scopeElement) {
@@ -605,6 +545,8 @@ function getPoseFromHeadViewport(scopeElement, headViewport) {
 export default function SiteRobot({ scopeRef }) {
   const mountRef = React.useRef(null);
   const walkerRef = React.useRef(null);
+  const buttonRef = React.useRef(null);
+  const avatarBoundsRef = React.useRef(new THREE.Box3());
   const panelRef = React.useRef(null);
   const cardsRef = React.useRef([]);
   const layoutRef = React.useRef({ width: 0, height: 0 });
@@ -642,7 +584,6 @@ export default function SiteRobot({ scopeRef }) {
   });
   const activeActionRef = React.useRef({ key: null, action: null });
   const activeElementRef = React.useRef(null);
-  const abortRef = React.useRef(null);
   const inputRef = React.useRef(null);
   const chatOpenRef = React.useRef(false);
   const focusOpenRef = React.useRef(false);
@@ -653,20 +594,27 @@ export default function SiteRobot({ scopeRef }) {
   const robotDragStateRef = React.useRef(null);
   const suppressRobotClickRef = React.useRef(false);
 
-  const [status, setStatus] = React.useState({ online: null, text: "Checking model..." });
+  const marvin = useMarvin();
+  const status = { online: marvin.health === "ready", text: marvin.health === "ready" ? "Online" : marvin.health === "offline" ? "Offline" : "Connecting" };
+  const promptText = marvin.prompt;
+  const replyText = marvin.text;
+  const queued = marvin.phase === "queued";
+  const streamMeta = { step: marvin.step, totalSteps: marvin.totalSteps, streaming: queued || marvin.phase === "connecting" || marvin.phase === "streaming" };
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const [chatOpen, setChatOpen] = React.useState(false);
   const [focusOpen, setFocusOpen] = React.useState(false);
-  const [promptText, setPromptText] = React.useState("");
-  const [replyText, setReplyText] = React.useState("");
-  const [streamMeta, setStreamMeta] = React.useState({ step: 0, totalSteps: 0, streaming: false });
   const [input, setInput] = React.useState("");
   const [visible, setVisible] = React.useState(false);
   const [bubbleSide, setBubbleSide] = React.useState("right");
   const [modelReady, setModelReady] = React.useState(false);
+  const [webglUnavailable, setWebglUnavailable] = React.useState(false);
   const [panelPosition, setPanelPosition] = React.useState({ x: 40, y: 40 });
   const [panelSize, setPanelSize] = React.useState({ width: 236, height: 154 });
   const [robotHeadOverlay, setRobotHeadOverlay] = React.useState({ x: 0, y: 0 });
+
+  React.useEffect(() => registerMarvinSurface(
+    "robot", mountRef.current, false, () => panelRef.current,
+  ), []);
 
   const pullMarvinByOffset = React.useCallback((offset) => {
     if (Math.abs(offset.x) < 0.5 && Math.abs(offset.y) < 0.5) {
@@ -739,8 +687,52 @@ export default function SiteRobot({ scopeRef }) {
 
     const previousLayout = layoutRef.current;
     const { width, height } = getScopeLayoutMetrics(scopeElement);
-    cardsRef.current = getCardGeometry(scopeElement);
+    const motion = motionRef.current;
+    const previousCard = cardsRef.current[motion.cardIndex];
+    const previousTarget = motion.pendingJump && cardsRef.current[motion.pendingJump.targetIndex];
+    cardsRef.current = getRobotSurfaces(scopeElement);
     layoutRef.current = { width, height };
+
+    // The portal is outside main's stacking context; its drawing coordinates
+    // still start at main's document position, including on deep-linked loads.
+    const scopeRect = scopeElement.getBoundingClientRect();
+    const portalStyle = {
+      left: `${scopeRect.left + window.pageXOffset}px`,
+      top: `${scopeRect.top + window.pageYOffset}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+    Object.keys(portalStyle).forEach((key) => {
+      if (mountElement.style[key] !== portalStyle[key]) mountElement.style[key] = portalStyle[key];
+    });
+
+    if (previousCard) {
+      const standingIndex = cardsRef.current.findIndex((card) => card.element === previousCard.element);
+      motion.cardIndex = standingIndex >= 0 ? standingIndex : getNearestCardIndex(cardsRef.current, poseRef.current);
+      const standingCard = cardsRef.current[motion.cardIndex];
+      if (standingCard && (motion.mode === "idle" || motion.mode === "walking")) {
+        motion.targetX = getStandingPoint(standingCard, motion.targetX).x;
+      }
+    }
+    if (previousTarget) {
+      const targetIndex = cardsRef.current.findIndex((card) => card.element === previousTarget.element);
+      if (targetIndex >= 0) {
+        motion.pendingJump.targetIndex = targetIndex;
+        const targetCard = cardsRef.current[targetIndex];
+        const landing = getStandingPoint(targetCard, motion.pendingJump.landingX);
+        motion.pendingJump.landingX = landing.x;
+        motion.pendingJump.settleX = getStandingPoint(targetCard, motion.pendingJump.settleX).x;
+        if (motion.mode === "jumping") motion.jumpEnd = landing;
+      } else {
+        motion.pendingJump = null;
+        if (motion.mode === "jumping") {
+          motion.mode = "falling";
+          motion.airbornePose = { ...poseRef.current };
+          motion.velocityX = 0;
+          motion.velocityY = 0;
+        }
+      }
+    }
 
     if (
       width !== previousLayout.width ||
@@ -750,7 +742,12 @@ export default function SiteRobot({ scopeRef }) {
     }
 
     if (!poseRef.current.visible && cardsRef.current.length) {
-      const first = cardsRef.current[0];
+      const viewportHeight = window.innerHeight || 800;
+      const visibleIndex = cardsRef.current.findIndex((card) => (
+        card.top + scopeRect.top >= 78 && card.top + scopeRect.top <= viewportHeight - 20
+      ));
+      const firstIndex = visibleIndex >= 0 ? visibleIndex : 0;
+      const first = cardsRef.current[firstIndex];
       const initial = getStandingPoint(first, first.left + first.width * 0.24);
       poseRef.current = {
         x: initial.x,
@@ -758,24 +755,11 @@ export default function SiteRobot({ scopeRef }) {
         facingLeft: false,
         visible: true,
       };
-      motionRef.current.cardIndex = 0;
+      motionRef.current.cardIndex = firstIndex;
       motionRef.current.targetX = initial.x;
       motionRef.current.nextActionAt = performance.now() + 2600;
       setVisible(true);
     }
-  }, [scopeRef]);
-
-  const syncLayoutBounds = React.useCallback(() => {
-    const scopeElement = scopeRef && scopeRef.current;
-    if (!scopeElement) {
-      return;
-    }
-
-    const { width, height } = getScopeLayoutMetrics(scopeElement);
-    layoutRef.current = {
-      width: width || layoutRef.current.width,
-      height: height || layoutRef.current.height,
-    };
   }, [scopeRef]);
 
   React.useEffect(() => {
@@ -799,47 +783,22 @@ export default function SiteRobot({ scopeRef }) {
   }, []);
 
   React.useEffect(() => {
-    let cancelled = false;
-
-    fetch(`${SPACE_URL}/health`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Health check failed with ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (!cancelled) {
-          setStatus({
-            online: Boolean(data.model_loaded),
-            text: data.model_loaded ? "Online" : "Warming up",
-          });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStatus({
-            online: false,
-            text: "Unreachable",
-          });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  React.useEffect(() => {
     if (!mountRef.current) {
       return undefined;
     }
 
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+    } catch (error) {
+      // The DOM chat remains usable when the browser cannot create a 3D context.
+      setWebglUnavailable(true);
+      return undefined;
+    }
     renderer.setClearColor(0x000000, 0);
     renderer.domElement.className = "site-robot__webgl";
     renderer.outputEncoding = THREE.sRGBEncoding;
@@ -972,9 +931,6 @@ export default function SiteRobot({ scopeRef }) {
 
     return () => {
       clearActiveElement();
-      if (abortRef.current) {
-        abortRef.current.abort();
-      }
       if (renderer.domElement.parentNode === mountRef.current) {
         mountRef.current.removeChild(renderer.domElement);
       }
@@ -1004,7 +960,7 @@ export default function SiteRobot({ scopeRef }) {
       scrollScheduled = true;
       window.requestAnimationFrame(() => {
         scrollScheduled = false;
-        syncLayoutBounds();
+        measureLayout();
       });
     };
     const observer = window.ResizeObserver && scopeRef && scopeRef.current
@@ -1017,6 +973,11 @@ export default function SiteRobot({ scopeRef }) {
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleScroll, { passive: true });
+    const scopeElement = scopeRef && scopeRef.current;
+    if (scopeElement) {
+      scopeElement.addEventListener("load", handleResize, true);
+      scopeElement.addEventListener("toggle", handleResize, true);
+    }
 
     return () => {
       if (observer) {
@@ -1024,8 +985,12 @@ export default function SiteRobot({ scopeRef }) {
       }
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
+      if (scopeElement) {
+        scopeElement.removeEventListener("load", handleResize, true);
+        scopeElement.removeEventListener("toggle", handleResize, true);
+      }
     };
-  }, [measureLayout, scopeRef, syncLayoutBounds]);
+  }, [measureLayout, scopeRef]);
 
   React.useEffect(() => {
     if (focusOpen && inputRef.current) {
@@ -1681,6 +1646,21 @@ export default function SiteRobot({ scopeRef }) {
 
       setBubbleSide(displayPose.x > width * 0.58 ? "left" : "right");
       characterPivot.position.set(baseYawPositionX, baseYawPositionY, 0);
+
+      // Follow the animated model, including feet, waving hands and drag tilt.
+      // A fixed rectangle at the chat anchor used to miss the lower body.
+      const avatarBounds = avatarBoundsRef.current.setFromObject(characterPivot);
+      if (buttonRef.current && !avatarBounds.isEmpty()) {
+        const padding = 5;
+        const hitWidth = Math.max(44, avatarBounds.max.x - avatarBounds.min.x + padding * 2);
+        const hitHeight = Math.max(44, avatarBounds.max.y - avatarBounds.min.y + padding * 2);
+        const hitCenterX = (avatarBounds.min.x + avatarBounds.max.x) / 2 + width / 2;
+        const hitCenterY = height / 2 - (avatarBounds.min.y + avatarBounds.max.y) / 2;
+        buttonRef.current.style.left = `${hitCenterX - hitWidth / 2 - displayPose.x - UI_ANCHOR_OFFSET.x}px`;
+        buttonRef.current.style.top = `${hitCenterY - hitHeight / 2 - displayPose.y - UI_ANCHOR_OFFSET.y}px`;
+        buttonRef.current.style.width = `${hitWidth}px`;
+        buttonRef.current.style.height = `${hitHeight}px`;
+      }
       renderer.render(scene, camera);
       frameId = window.requestAnimationFrame(animate);
     };
@@ -1692,9 +1672,6 @@ export default function SiteRobot({ scopeRef }) {
   const closeChat = React.useCallback(() => {
     const isAirborne = motionRef.current.mode === "dangling" || motionRef.current.mode === "falling";
 
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
     chatOpenRef.current = false;
     focusOpenRef.current = false;
     motionRef.current.dragActive = false;
@@ -1705,6 +1682,7 @@ export default function SiteRobot({ scopeRef }) {
     }
     setFocusOpen(false);
     setChatOpen(false);
+    setMarvinSurfaceEnabled("robot", false);
   }, [settleToNearestCard]);
 
   const handleRobotPointerDown = React.useCallback((event) => {
@@ -1771,9 +1749,14 @@ export default function SiteRobot({ scopeRef }) {
     }
     setChatOpen(true);
     setFocusOpen(true);
+    setMarvinSurfaceEnabled("robot", true);
   }, [bubbleSide, closeChat, scopeRef, settleToNearestCard]);
 
   React.useEffect(() => {
+    const handleOutside = (event) => {
+      if (chatOpenRef.current && mountRef.current && !mountRef.current.contains(event.target))
+        closeChat();
+    };
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") {
         return;
@@ -1788,7 +1771,13 @@ export default function SiteRobot({ scopeRef }) {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener("click", handleOutside, true);
+    document.addEventListener("focusin", handleOutside, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("click", handleOutside, true);
+      document.removeEventListener("focusin", handleOutside, true);
+    };
   }, [closeChat]);
 
   const handlePanelDragStart = React.useCallback((event) => {
@@ -1824,145 +1813,32 @@ export default function SiteRobot({ scopeRef }) {
     [input, streamMeta.streaming]
   );
 
-  const handleSubmit = React.useCallback(
-    async (event) => {
-      event.preventDefault();
-      const prompt = input.trim();
+  const handleSubmit = React.useCallback((event) => {
+    event.preventDefault();
+    if (!input.trim() || streamMeta.streaming) return;
+    setInput("");
+    chatOpenRef.current = true;
+    focusOpenRef.current = true;
+    setChatOpen(true);
+    setFocusOpen(true);
+    setMarvinSurfaceEnabled("robot", true);
+    generateMarvin(input);
+  }, [input, streamMeta.streaming]);
 
-      if (!prompt || streamMeta.streaming) {
-        return;
-      }
-
-      setPromptText(prompt);
-      setReplyText("");
-      setInput("");
-      chatOpenRef.current = true;
-      focusOpenRef.current = false;
-      streamingRef.current = true;
-      setChatOpen(true);
-      setFocusOpen(false);
-      setStreamMeta({
-        step: 0,
-        totalSteps: 96,
-        streaming: true,
-      });
-
-      const controller = window.AbortController ? new window.AbortController() : null;
-      abortRef.current = controller;
-
-      try {
-        const response = await fetch(`${SPACE_URL}/generate_sse`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompt,
-            system_prompt: SYSTEM_PROMPT,
-            steps: 96,
-            max_new_tokens: 96,
-            capture_interval: 8,
-            temperature: 0.2,
-            cfg_scale: 0.0,
-            remasking: "low_confidence",
-          }),
-          signal: controller ? controller.signal : undefined,
-        });
-
-        if (!response.ok || !response.body) {
-          const detail = await response.text();
-          throw new Error(detail || `Request failed with ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let sawTerminalEvent = false;
-
-        const processEvent = (rawEvent) => {
-          rawEvent
-            .split("\n")
-            .filter((line) => line.startsWith("data: "))
-            .forEach((line) => {
-              const payload = JSON.parse(line.slice(6));
-              if (payload.type !== "intermediate" && payload.type !== "final") {
-                return;
-              }
-
-              setReplyText(payload.text);
-              streamingRef.current = payload.type !== "final";
-              sawTerminalEvent = sawTerminalEvent || payload.type === "final";
-              setStreamMeta({
-                step: payload.step || payload.total_steps || 0,
-                totalSteps: payload.total_steps || 0,
-                streaming: payload.type !== "final",
-              });
-            });
-        };
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
-
-          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
-          let boundary = buffer.indexOf("\n\n");
-
-          while (boundary !== -1) {
-            const rawEvent = buffer.slice(0, boundary);
-            buffer = buffer.slice(boundary + 2);
-            processEvent(rawEvent);
-
-            boundary = buffer.indexOf("\n\n");
-          }
-        }
-
-        buffer += decoder.decode().replace(/\r\n/g, "\n");
-        if (buffer.trim()) {
-          processEvent(buffer.trim());
-        }
-
-        if (!sawTerminalEvent) {
-          streamingRef.current = false;
-          setStreamMeta((current) => ({
-            ...current,
-            streaming: false,
-          }));
-        }
-      } catch (requestError) {
-        const wasAborted = requestError.name === "AbortError";
-        setReplyText((current) =>
-          current || (wasAborted ? "I stopped before the answer fully settled." : "I lost contact with the diffusion space for a moment.")
-        );
-        setStreamMeta((current) => ({
-          ...current,
-          streaming: false,
-        }));
-        streamingRef.current = false;
-      } finally {
-        abortRef.current = null;
-        streamingRef.current = false;
-      }
-    },
-    [input, streamMeta.streaming]
-  );
-
-  const handleStop = React.useCallback(() => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
-  }, []);
+  const handleStop = (event) => {
+    event.preventDefault();
+    stopMarvin();
+  };
 
   if (!visible) {
-    return <div ref={mountRef} className="site-robot site-robot--projects" />;
+    return createPortal(<div ref={mountRef} className="site-robot site-robot--page" />, document.body);
   }
 
-  const introText = "I am a 0.6B diffusion language model running on a CPU, so my replies will be slow and not always great :^)";
+  const introText = "I’m Marvin, a little diffusion model running on CPU. Ask me something, then watch my steps in the brain view.";
   const showIntroDialogue = focusOpen && !promptText && !replyText && !streamMeta.streaming;
   const hasDialogue = Boolean(promptText || replyText || streamMeta.streaming || showIntroDialogue);
   const showBubbleStack = chatOpen;
-  const robotHeadViewport = showBubbleStack
+  const robotHeadViewport = showBubbleStack && !webglUnavailable
     ? robotHeadOverlay
     : getRobotHeadViewport(
       scopeRef && scopeRef.current,
@@ -1977,18 +1853,32 @@ export default function SiteRobot({ scopeRef }) {
     : robotHeadViewport;
   const connectorPath = getConnectorPath(connectorHeadViewport, panelAnchor);
 
-  return (
-    <div ref={mountRef} className="site-robot site-robot--projects">
-      <div ref={walkerRef} className="site-robot__walker">
+  return createPortal(
+    <div ref={mountRef} className="site-robot site-robot--page">
+      <div
+        ref={walkerRef}
+        className="site-robot__walker"
+        style={webglUnavailable ? {
+          transform: `translate3d(${poseRef.current.x}px, ${poseRef.current.y}px, 0)`,
+        } : undefined}
+      >
         <div className="site-robot__ui-anchor">
           <button
+            ref={buttonRef}
             type="button"
             className={`site-robot__button${modelReady ? " is-ready" : ""}`}
             onClick={handleRobotClick}
             onPointerDown={handleRobotPointerDown}
             aria-expanded={focusOpen}
             aria-label="Talk to Marvin"
-          />
+            style={webglUnavailable ? {
+              width: 64, height: 30, top: 24, left: -14,
+              background: "#f0efea", border: "1px solid #c4cbb8",
+              color: "#535d49", fontSize: 11,
+            } : undefined}
+          >
+            {webglUnavailable ? "Marvin" : null}
+          </button>
         </div>
       </div>
       {showBubbleStack && (
@@ -2013,11 +1903,15 @@ export default function SiteRobot({ scopeRef }) {
                 <div className="site-robot__dialogue-header">
                   <span>Marvin</span>
                   <span className={status.online ? "is-online" : ""}>
-                    {streamMeta.streaming ? `step ${streamMeta.step}/${streamMeta.totalSteps || "?"}` : status.text}
+                    {queued ? "Waiting" : streamMeta.streaming ? `step ${streamMeta.step}/${streamMeta.totalSteps || "?"}` : marvin.phase === "error" ? "Connection interrupted" : status.text}
                   </span>
                 </div>
                 {promptText ? <div className="site-robot__prompt-label">{promptText}</div> : null}
-                <p>{replyText || (showIntroDialogue ? introText : "Ask Marvin something.")}</p>
+                <p role={queued ? "status" : undefined}>
+                  {queued ? QUEUED_MESSAGE : replyText || (showIntroDialogue ? introText : streamMeta.streaming ? "Thinking…" : "Ask Marvin something.")}
+                  {queued && <strong className="site-robot__queue-position">{marvinQueuePosition(marvin.queuePosition)}</strong>}
+                </p>
+                {marvin.error && <p className="site-robot__error" role="alert">{marvin.error}</p>}
               </div>
             )}
 
@@ -2028,15 +1922,26 @@ export default function SiteRobot({ scopeRef }) {
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={handleComposerKeyDown}
+                  aria-label="Message Marvin"
+                  maxLength={1000}
                   rows={2}
                   placeholder="Ask Marvin about a project or diffusion..."
+                  disabled={streamMeta.streaming}
                 />
                 <div className="site-robot__composer-actions">
-                  <span>`Cashel/diffusion-chatbot`</span>
+                  <a href="#brain" onClick={() => {
+                    const brain = document.getElementById("brain");
+                    if (brain) {
+                      brain.scrollIntoView({ block: "start", behavior: "instant" });
+                      brain.focus({ preventScroll: true });
+                      engageMarvinSurface("brain");
+                    }
+                    closeChat();
+                  }}>See my brain ↗</a>
                   <div className="site-robot__composer-buttons">
                     {streamMeta.streaming ? (
                       <button type="button" className="is-secondary" onClick={handleStop}>
-                        Stop
+                        {queued ? "Cancel" : "Stop"}
                       </button>
                     ) : null}
                     <button type="submit" disabled={!input.trim() || streamMeta.streaming}>
@@ -2049,6 +1954,7 @@ export default function SiteRobot({ scopeRef }) {
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

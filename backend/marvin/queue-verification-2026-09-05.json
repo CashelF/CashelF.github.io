@@ -1,0 +1,283 @@
+{
+  "base": "https://cashel-diffusion-chatbot.hf.space",
+  "before": {
+    "device": "cpu",
+    "model": "dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+    "model_loaded": true,
+    "queue": {
+      "active": false,
+      "capacity": 2,
+      "lease_seconds": 12,
+      "waiting": 0
+    },
+    "status": "healthy",
+    "telemetry": {
+      "architecture": {
+        "headDim": 128,
+        "hiddenSize": 1024,
+        "kvHeads": 8,
+        "layers": 28,
+        "mlpWidth": 3072,
+        "modelFamily": "bd3lm",
+        "modelId": "dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+        "modelLabel": "Qwen3 \u00b7 0.6B",
+        "modelUrl": "https://huggingface.co/dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+        "queryHeads": 16
+      },
+      "available": true,
+      "internals": true,
+      "layer_count": 28,
+      "max_tokens": 32,
+      "metric": "hidden_state_rms",
+      "token_states": true,
+      "version": 1
+    }
+  },
+  "after": {
+    "device": "cpu",
+    "model": "dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+    "model_loaded": true,
+    "queue": {
+      "active": false,
+      "capacity": 2,
+      "lease_seconds": 12,
+      "waiting": 0
+    },
+    "status": "healthy",
+    "telemetry": {
+      "architecture": {
+        "headDim": 128,
+        "hiddenSize": 1024,
+        "kvHeads": 8,
+        "layers": 28,
+        "mlpWidth": 3072,
+        "modelFamily": "bd3lm",
+        "modelId": "dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+        "modelLabel": "Qwen3 \u00b7 0.6B",
+        "modelUrl": "https://huggingface.co/dllm-hub/Qwen3-0.6B-diffusion-bd3lm-v0.1",
+        "queryHeads": 16
+      },
+      "available": true,
+      "internals": true,
+      "layer_count": 28,
+      "max_tokens": 32,
+      "metric": "hidden_state_rms",
+      "token_states": true,
+      "version": 1
+    }
+  },
+  "overflow_status": 429,
+  "overflow_message": "{\"code\":\"queue_full\",\"error\":\"Marvin's got a little crowd. Try again shortly.\"}\n",
+  "jobs": [
+    {
+      "name": "active",
+      "events": [
+        {
+          "at": 0.101,
+          "type": "start"
+        },
+        {
+          "at": 2.047,
+          "type": "intermediate",
+          "step": 1
+        },
+        {
+          "at": 2.974,
+          "type": "intermediate",
+          "step": 2
+        },
+        {
+          "at": 3.591,
+          "type": "intermediate",
+          "step": 3
+        },
+        {
+          "at": 4.403,
+          "type": "intermediate",
+          "step": 4
+        },
+        {
+          "at": 5.228,
+          "type": "intermediate",
+          "step": 5
+        },
+        {
+          "at": 5.965,
+          "type": "intermediate",
+          "step": 6
+        },
+        {
+          "at": 6.865,
+          "type": "intermediate",
+          "step": 7
+        },
+        {
+          "at": 7.682,
+          "type": "intermediate",
+          "step": 8
+        },
+        {
+          "at": 8.504,
+          "type": "intermediate",
+          "step": 9
+        },
+        {
+          "at": 9.326,
+          "type": "intermediate",
+          "step": 10
+        },
+        {
+          "at": 10.148,
+          "type": "intermediate",
+          "step": 11
+        },
+        {
+          "at": 11.165,
+          "type": "intermediate",
+          "step": 12
+        },
+        {
+          "at": 11.818,
+          "type": "intermediate",
+          "step": 13
+        },
+        {
+          "at": 12.801,
+          "type": "intermediate",
+          "step": 14
+        },
+        {
+          "at": 13.621,
+          "type": "intermediate",
+          "step": 15
+        },
+        {
+          "at": 14.439,
+          "type": "intermediate",
+          "step": 16
+        },
+        {
+          "at": 14.439,
+          "type": "final",
+          "step": 16
+        }
+      ],
+      "measured_frames": 16
+    },
+    {
+      "name": "cancelled_waiter",
+      "events": [
+        {
+          "at": 0.72,
+          "type": "queued",
+          "position": 1
+        },
+        {
+          "at": 1.534,
+          "type": "queued",
+          "position": 1
+        },
+        {
+          "at": 2.047,
+          "type": "error",
+          "error": "Request cancelled.",
+          "code": "cancelled"
+        }
+      ],
+      "measured_frames": 0
+    },
+    {
+      "name": "promoted_waiter",
+      "events": [
+        {
+          "at": 1.534,
+          "type": "queued",
+          "position": 2
+        },
+        {
+          "at": 2.047,
+          "type": "queued",
+          "position": 1
+        },
+        {
+          "at": 14.438,
+          "type": "start"
+        },
+        {
+          "at": 15.666,
+          "type": "intermediate",
+          "step": 1
+        },
+        {
+          "at": 15.866,
+          "type": "intermediate",
+          "step": 2
+        },
+        {
+          "at": 16.29,
+          "type": "intermediate",
+          "step": 3
+        },
+        {
+          "at": 16.551,
+          "type": "intermediate",
+          "step": 4
+        },
+        {
+          "at": 16.894,
+          "type": "intermediate",
+          "step": 5
+        },
+        {
+          "at": 17.311,
+          "type": "intermediate",
+          "step": 6
+        },
+        {
+          "at": 17.715,
+          "type": "intermediate",
+          "step": 7
+        },
+        {
+          "at": 17.938,
+          "type": "intermediate",
+          "step": 8
+        },
+        {
+          "at": 17.938,
+          "type": "final",
+          "step": 8
+        }
+      ],
+      "measured_frames": 8
+    },
+    {
+      "name": "overflow",
+      "events": [],
+      "measured_frames": 0
+    },
+    {
+      "name": "cancelled_active",
+      "events": [
+        {
+          "at": 0.078,
+          "type": "start"
+        },
+        {
+          "at": 2.131,
+          "type": "intermediate",
+          "step": 1
+        },
+        {
+          "at": 2.338,
+          "type": "error",
+          "error": "Request cancelled.",
+          "code": "cancelled"
+        }
+      ],
+      "measured_frames": 1
+    }
+  ],
+  "deployment_revision": "af354097b78524aad236ad0ce9e63803be2ec2f2",
+  "verified_on": "2026-09-05"
+}
