@@ -2,6 +2,8 @@ import React from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three/build/three";
 import { getRobotSurfaces } from "../robotSurfaces";
+import { getStandingPoint, getSurfaceHeight, getWalkingHeight, getSurfaceSlope, advanceAlongSurface, splitSurfaceAtCliffs } from "../robotTerrain";
+import { getFootingCorrection } from "../robotFooting";
 import {
   useMarvin, generateMarvin, stopMarvin, registerMarvinSurface,
   setMarvinSurfaceEnabled, engageMarvinSurface, QUEUED_MESSAGE, marvinQueuePosition,
@@ -142,14 +144,6 @@ function getScopeLayoutMetrics(scopeElement) {
   };
 }
 
-function getStandingPoint(card, preferredX) {
-  const margin = Math.min(34, card.width * 0.18);
-  return {
-    x: clamp(preferredX, card.left + margin, card.right - margin),
-    y: card.top,
-  };
-}
-
 function getJumpProfile(start, end) {
   const horizontalGap = Math.abs(end.x - start.x);
   const verticalRise = Math.max(0, start.y - end.y);
@@ -258,10 +252,11 @@ function resolveClipBindings(clips, mixer) {
   };
 
   const assignByPatterns = (key, patterns) => {
-    const match = clipEntries.find(
-      ({ clip, normalizedName }) =>
-        !used.has(clip) && patterns.some((pattern) => normalizedName.includes(pattern))
-    );
+    let match;
+    patterns.some(pattern => {
+      match = clipEntries.find(({ clip, normalizedName }) => !used.has(clip) && normalizedName.includes(pattern));
+      return Boolean(match);
+    });
 
     if (!match) {
       return null;
@@ -275,7 +270,7 @@ function resolveClipBindings(clips, mixer) {
   assignByPatterns("idle", ["idle", "standing", "stand", "breathe"]);
   assignByPatterns("walkJump", ["walkjump", "walk jump", "vault", "hop"]);
   assignByPatterns("jump", ["jump", "leap", "fall"]);
-  assignByPatterns("walk", ["walk", "walking", "run", "running", "jog", "locomotion"]);
+  assignByPatterns("walk", ["walking", "walk", "running", "run", "jog", "locomotion"]);
   assignByPatterns("wave", ["wave", "hello", "greet", "thumbs up", "thumbsup"]);
 
   if (!actionMap.walk && clipEntries.length === 1) {
@@ -367,7 +362,7 @@ function getNearestCardIndex(cards, pose) {
 
   cards.forEach((card, index) => {
     const standing = getStandingPoint(card, pose.x || card.left + card.width * 0.5);
-    const score = Math.abs(standing.x - pose.x) + Math.abs(card.top - pose.y) * 3.4;
+    const score = Math.abs(standing.x - pose.x) + Math.abs(standing.y - pose.y) * 3.4;
 
     if (score < bestScore) {
       bestScore = score;
@@ -388,7 +383,7 @@ function getSurfaceBelow(cards, pose, layoutWidth, layoutHeight) {
   const wrappedX = wrapCoordinate(pose.x, layoutWidth || 1);
   const candidates = cards
     .map((card, index) => {
-      let downwardDelta = card.top - pose.y;
+      let downwardDelta = getStandingPoint(card, wrappedX).y - pose.y;
       if (downwardDelta < -overshootAllowance) {
         downwardDelta =
           wrapCoordinate(downwardDelta + overshootAllowance, layoutHeight || 1) -
@@ -403,8 +398,8 @@ function getSurfaceBelow(cards, pose, layoutWidth, layoutHeight) {
     })
     .filter(
       (item) =>
-        wrappedX >= item.card.left - horizontalLandingMargin &&
-        wrappedX <= item.card.right + horizontalLandingMargin
+        wrappedX >= item.card.left - (item.card.profile ? 0 : horizontalLandingMargin) &&
+        wrappedX <= item.card.right + (item.card.profile ? 0 : horizontalLandingMargin)
     );
 
   if (!candidates.length) {
@@ -547,6 +542,8 @@ export default function SiteRobot({ scopeRef }) {
   const walkerRef = React.useRef(null);
   const buttonRef = React.useRef(null);
   const avatarBoundsRef = React.useRef(new THREE.Box3());
+  const footVertexRef = React.useRef(new THREE.Vector3());
+  const groundingRef = React.useRef(null);
   const panelRef = React.useRef(null);
   const cardsRef = React.useRef([]);
   const layoutRef = React.useRef({ width: 0, height: 0 });
@@ -571,6 +568,7 @@ export default function SiteRobot({ scopeRef }) {
     velocityY: 0,
     dragActive: false,
     airbornePose: null,
+    landedAt: 0,
   });
   const threeRef = React.useRef({
     renderer: null,
@@ -690,7 +688,18 @@ export default function SiteRobot({ scopeRef }) {
     const motion = motionRef.current;
     const previousCard = cardsRef.current[motion.cardIndex];
     const previousTarget = motion.pendingJump && cardsRef.current[motion.pendingJump.targetIndex];
-    cardsRef.current = getRobotSurfaces(scopeElement);
+    const measuredSurfaces = getRobotSurfaces(scopeElement).reduce((surfaces, surface) => surfaces.concat(splitSurfaceAtCliffs(surface)), []);
+    // A shoulder ledge continues underneath the hair. Prefer its full path to
+    // the shorter, overlapping part of the outer silhouette.
+    cardsRef.current = measuredSurfaces.filter(surface => !(
+      surface.kind === "image" && surface.key.indexOf("image-outline-section-") === 0 &&
+      measuredSurfaces.some(ledge => ledge.element === surface.element && ledge.key.indexOf("image-alpha-ledge-") === 0 &&
+        ledge.left <= surface.left + 8 && ledge.right >= surface.right - 8 && ledge.width > surface.width &&
+        [0.2, 0.5, 0.8].every(fraction => {
+          const x = surface.left + surface.width * fraction;
+          return Math.abs(getSurfaceHeight(surface, x) - getSurfaceHeight(ledge, x)) < 4;
+        }))
+    ));
     layoutRef.current = { width, height };
 
     // The portal is outside main's stacking context; its drawing coordinates
@@ -707,7 +716,7 @@ export default function SiteRobot({ scopeRef }) {
     });
 
     if (previousCard) {
-      const standingIndex = cardsRef.current.findIndex((card) => card.element === previousCard.element);
+      const standingIndex = cardsRef.current.findIndex((card) => card.element === previousCard.element && card.key === previousCard.key);
       motion.cardIndex = standingIndex >= 0 ? standingIndex : getNearestCardIndex(cardsRef.current, poseRef.current);
       const standingCard = cardsRef.current[motion.cardIndex];
       if (standingCard && (motion.mode === "idle" || motion.mode === "walking")) {
@@ -715,7 +724,7 @@ export default function SiteRobot({ scopeRef }) {
       }
     }
     if (previousTarget) {
-      const targetIndex = cardsRef.current.findIndex((card) => card.element === previousTarget.element);
+      const targetIndex = cardsRef.current.findIndex((card) => card.element === previousTarget.element && card.key === previousTarget.key);
       if (targetIndex >= 0) {
         motion.pendingJump.targetIndex = targetIndex;
         const targetCard = cardsRef.current[targetIndex];
@@ -898,6 +907,26 @@ export default function SiteRobot({ scopeRef }) {
         model.rotation.set(0, MODEL_BASE_YAW, 0);
 
         characterPivot.add(model);
+
+        // The feet are rigid meshes animated by their parent bones. Cache their
+        // actual vertices once; bounding boxes leave slack as the feet rotate.
+        const footSamples = [];
+        model.traverse((node) => {
+          if (!node.isMesh || !/foot/i.test(node.name) || !node.geometry.attributes.position) return;
+          const positions = node.geometry.attributes.position;
+          const seen = new Set();
+          const points = [];
+          for (let index = 0; index < positions.count; index += 1) {
+            const point = new THREE.Vector3().fromBufferAttribute(positions, index);
+            const key = `${point.x},${point.y},${point.z}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              points.push(point);
+            }
+          }
+          footSamples.push({ node, points });
+        });
+        threeRef.current.footSamples = footSamples;
 
         const mixer = new THREE.AnimationMixer(model);
         const { actionMap, actionSpeedMap } = resolveClipBindings(gltf.animations, mixer);
@@ -1214,24 +1243,34 @@ export default function SiteRobot({ scopeRef }) {
 
   React.useEffect(() => {
     let frameId;
+    let disposed = false;
     let lastTime = 0;
     let lastMeasureAt = 0;
+    const scheduleFrame = () => {
+      if (!disposed) frameId = window.requestAnimationFrame(animate);
+    };
 
-    const pickWalkTarget = (card) =>
-      sample([
-        card.left + card.width * 0.26,
-        card.left + card.width * 0.5,
-        card.left + card.width * 0.74,
-      ]);
+    const pickWalkTarget = (card) => {
+      const positions = card.profile ? [0.08, 0.3, 0.5, 0.7, 0.92] : [0.26, 0.5, 0.74];
+      const targets = positions.map(position => card.left + card.width * position);
+      const away = targets.filter(x => Math.abs(x - poseRef.current.x) > Math.min(24, card.width * 0.2));
+      return sample(away.length ? away : targets);
+    };
 
     const pickJumpTargetIndex = (currentIndex) => {
       const currentCard = cardsRef.current[currentIndex];
+      const currentPoint = getStandingPoint(currentCard, poseRef.current.x);
+      if (currentCard.kind === "image" && Math.random() < 0.7) {
+        const imageLedges = cardsRef.current.map((card, index) => ({ card, index }))
+          .filter(item => item.index !== currentIndex && item.card.element === currentCard.element);
+        if (imageLedges.length) return sample(imageLedges).index;
+      }
       const candidates = cardsRef.current
         .map((card, index) => ({
           card,
           index,
           score:
-            Math.abs(card.top - currentCard.top) * 3.2 +
+            Math.abs(getStandingPoint(card, currentPoint.x).y - currentPoint.y) * 3.2 +
             Math.abs((card.left + card.right) / 2 - (currentCard.left + currentCard.right) / 2),
         }))
         .filter((item) => item.index !== currentIndex)
@@ -1248,6 +1287,7 @@ export default function SiteRobot({ scopeRef }) {
       }
 
       clearActiveElement();
+      motionRef.current.landedAt = performance.now();
       card.element.classList.add("robot-bopped");
       activeElementRef.current = card.element;
       window.setTimeout(() => {
@@ -1256,11 +1296,14 @@ export default function SiteRobot({ scopeRef }) {
     };
 
     const animate = (now) => {
+      if (disposed) return;
       if (!lastTime) {
         lastTime = now;
       }
 
-      if (now - lastMeasureAt > 900) {
+      // Layout events still refresh immediately; do the periodic catch-up
+      // between walks so raster/path measurements cannot interrupt a stride.
+      if (now - lastMeasureAt > 900 && motionRef.current.mode === "idle") {
         measureLayout();
         lastMeasureAt = now;
       }
@@ -1272,13 +1315,13 @@ export default function SiteRobot({ scopeRef }) {
       const { renderer, scene, camera, mixer, clock, characterPivot, actionMap, actionSpeedMap } = threeState;
 
       if (!renderer || !scene || !camera || !characterPivot) {
-        frameId = window.requestAnimationFrame(animate);
+        scheduleFrame();
         return;
       }
 
       if (!cardsRef.current.length || !poseRef.current.visible) {
         renderer.render(scene, camera);
-        frameId = window.requestAnimationFrame(animate);
+        scheduleFrame();
         return;
       }
 
@@ -1286,7 +1329,7 @@ export default function SiteRobot({ scopeRef }) {
       const currentCard = cardsRef.current[motion.cardIndex] || cardsRef.current[0];
       const chatIsOpen = chatOpenRef.current;
       const currentPanelAnchor = getPanelAnchor(panelPositionRef.current, panelSizeRef.current);
-      const displayPose = getDisplayPose(motion, poseRef.current, layoutRef.current);
+      let displayPose = getDisplayPose(motion, poseRef.current, layoutRef.current);
       const headViewport = getRobotHeadViewport(scopeRef && scopeRef.current, displayPose);
 
       if (
@@ -1309,7 +1352,7 @@ export default function SiteRobot({ scopeRef }) {
         snapToAction(actionMap, activeActionRef, "idle", actionSpeedMap);
       }
 
-      if (motion.mode === "idle" && now >= motion.nextActionAt && !chatIsOpen) {
+      if (motion.mode === "idle" && now >= motion.nextActionAt && !chatIsOpen && !reduceMotion) {
         const shouldJump = !reduceMotion && cardsRef.current.length > 1 && Math.random() > 0.64;
 
         if (shouldJump) {
@@ -1341,13 +1384,11 @@ export default function SiteRobot({ scopeRef }) {
       }
 
       if (motion.mode === "walking") {
-        const stand = getStandingPoint(currentCard, poseRef.current.x || currentCard.left + currentCard.width * 0.46);
         const dx = motion.targetX - poseRef.current.x;
         const step = reduceMotion ? Math.abs(dx) : 0.024 * dt;
-        let nextX = poseRef.current.x;
+        const nextX = reduceMotion ? motion.targetX : advanceAlongSurface(currentCard, poseRef.current.x, motion.targetX, step);
 
-        if (Math.abs(dx) <= step || reduceMotion) {
-          nextX = motion.targetX;
+        if (Math.abs(motion.targetX - nextX) < 0.01 || reduceMotion) {
           if (motion.pendingJump) {
             const jumpTarget = cardsRef.current[motion.pendingJump.targetIndex];
             const start = getStandingPoint(currentCard, nextX);
@@ -1365,13 +1406,12 @@ export default function SiteRobot({ scopeRef }) {
             fadeToAction(actionMap, activeActionRef, "idle", actionSpeedMap);
           }
         } else {
-          nextX += Math.sign(dx) * step;
           fadeToAction(actionMap, activeActionRef, actionMap.walk ? "walk" : "idle", actionSpeedMap);
         }
 
         const nextPose = clampPoseToLayout({
           x: nextX,
-          y: stand.y,
+          y: getWalkingHeight(currentCard, nextX),
           facingLeft: dx < 0,
           visible: true,
         }, layoutRef.current);
@@ -1605,7 +1645,13 @@ export default function SiteRobot({ scopeRef }) {
       }
 
       const { width, height } = layoutRef.current;
+      displayPose = getDisplayPose(motion, poseRef.current, layoutRef.current);
       const isLocomoting = motion.mode === "walking" || motion.mode === "jumping";
+      const isGrounded = motion.mode === "idle" || motion.mode === "walking";
+      const standingSurface = cardsRef.current[motion.cardIndex] || currentCard;
+      const slopeLean = isGrounded && !reduceMotion
+        ? clamp(-Math.atan(getSurfaceSlope(standingSurface, displayPose.x)) * 0.32, -0.22, 0.22)
+        : 0;
       const isDangling = motion.mode === "dangling";
       const danglingTilt = isDangling
         ? clamp((currentPanelAnchor.x - headViewport.x) / MAX_TETHER_LENGTH, -0.28, 0.28)
@@ -1623,7 +1669,10 @@ export default function SiteRobot({ scopeRef }) {
       const targetPivotYaw = desiredYaw - MODEL_BASE_YAW;
       characterPivot.rotation.y += (targetPivotYaw - characterPivot.rotation.y) * 0.18;
       characterPivot.rotation.x += (danglingPitch - characterPivot.rotation.x) * 0.14;
-      characterPivot.rotation.z += (danglingTilt - characterPivot.rotation.z) * 0.14;
+      characterPivot.rotation.z += (danglingTilt + slopeLean - characterPivot.rotation.z) * 0.14;
+      const landingProgress = clamp((now - motion.landedAt) / 280, 0, 1);
+      const landingBend = isGrounded && !reduceMotion ? Math.sin(landingProgress * Math.PI) * 0.035 : 0;
+      characterPivot.scale.set(1 + landingBend * 0.3, 1 - landingBend, 1);
 
       if (walkerRef.current) {
         walkerRef.current.style.transform = `translate3d(${displayPose.x}px, ${displayPose.y}px, 0)`;
@@ -1647,6 +1696,29 @@ export default function SiteRobot({ scopeRef }) {
       setBubbleSide(displayPose.x > width * 0.58 ? "left" : "right");
       characterPivot.position.set(baseYawPositionX, baseYawPositionY, 0);
 
+      if (isGrounded && threeState.footSamples && threeState.footSamples.length) {
+        characterPivot.updateMatrixWorld(true);
+        const correction = getFootingCorrection(
+          threeState.footSamples, standingSurface, width, height, footVertexRef.current,
+          { reportUnsupported: true, maxSurfaceY: motion.mode === "walking"
+            ? getWalkingHeight(standingSurface, displayPose.x) + (standingSurface.kind === "text" ? 6 : 18) : Infinity }
+        );
+        const previous = groundingRef.current;
+        const continuous = previous && previous.element === standingSurface.element && previous.key === standingSurface.key &&
+          Math.abs(previous.x - displayPose.x) < 12;
+        const targetY = correction === null
+          ? continuous ? previous.y + displayPose.y - previous.poseY : displayPose.y
+          : displayPose.y - correction;
+        // Transfer weight between the feet over a few frames. Exact per-pixel
+        // contact can otherwise snap the torso as a sole crosses a letter gap.
+        const delta = continuous ? (targetY - previous.y) * (1 - Math.exp(-dt / 65)) : 0;
+        const groundedY = continuous ? previous.y + clamp(delta, -0.12 * dt, 0.12 * dt) : targetY;
+        characterPivot.position.y = height / 2 - groundedY;
+        groundingRef.current = { element: standingSurface.element, key: standingSurface.key, x: displayPose.x, poseY: displayPose.y, y: groundedY };
+      } else {
+        groundingRef.current = null;
+      }
+
       // Follow the animated model, including feet, waving hands and drag tilt.
       // A fixed rectangle at the chat anchor used to miss the lower body.
       const avatarBounds = avatarBoundsRef.current.setFromObject(characterPivot);
@@ -1662,11 +1734,14 @@ export default function SiteRobot({ scopeRef }) {
         buttonRef.current.style.height = `${hitHeight}px`;
       }
       renderer.render(scene, camera);
-      frameId = window.requestAnimationFrame(animate);
+      scheduleFrame();
     };
 
-    frameId = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(frameId);
+    scheduleFrame();
+    return () => {
+      disposed = true;
+      window.cancelAnimationFrame(frameId);
+    };
   }, [clearActiveElement, measureLayout, reduceMotion]);
 
   const closeChat = React.useCallback(() => {

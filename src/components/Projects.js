@@ -26,6 +26,7 @@ export default function Projects() {
             rel="noopener noreferrer"
             key={project.title}
             data-robot-target={project.title}
+            data-robot-platform="card"
           >
             <div className={`project-image project-image--${index}`}>
               <img src={project.thumbnail} alt="" loading="lazy" />

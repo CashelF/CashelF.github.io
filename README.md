@@ -47,6 +47,15 @@ target following the rendered model. The rest of that overlay passes clicks
 through. He can land on visible headings, text, images, links, controls, and
 panels throughout the site. Hidden or clipped content is excluded, and perches
 are refreshed after scrolling, resizing, image loads, and disclosure changes.
+Project cards provide a single top edge, with their contents excluded as perches.
+Text perches follow cached raster glyph contours, including lowercase letters;
+spaces do not support his feet. The portrait opts into an alpha contour with
+separate shoulder and hair ledges, including the shoulders underneath the hair.
+Walking uses a smoothed travel curve and gradual weight transfer between the
+feet; precise sole contact still uses the original ink and image contours.
+Steep ledges use jumps. Marvin uses the walking clip with a small slope lean
+and landing bend.
+Reduced motion keeps him still between manual drags.
 
 Token tiles show the actual masks and committed token IDs after each
 diffusion step, including earlier blocks kept as context. Selecting a token

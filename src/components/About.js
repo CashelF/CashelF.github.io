@@ -34,6 +34,7 @@ export default function About() {
           width="1024"
           height="1024"
           data-robot-target="Caricature of Cash"
+          data-robot-contour="true"
         />
         <figcaption>
           <span>Cashel Fitzgerald</span>
