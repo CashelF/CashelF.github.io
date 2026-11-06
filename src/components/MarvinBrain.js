@@ -61,19 +61,13 @@ export default function MarvinBrain() {
   };
 
   return (
-    <section
-      id="brain"
+    <div
       ref={sectionRef}
       tabIndex={-1}
       onPointerDown={() => engageMarvinSurface("brain")}
-      className="brain-section page-width"
-      aria-labelledby="brain-title"
+      className="brain-interactive"
     >
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">01 / LIVE DIFFUSION</p>
-          <h2 id="brain-title">Marvin’s brain.</h2>
-        </div>
+      <div className="brain-model-heading">
         <a
           className="brain-model-label"
           href={architecture.modelUrl}
@@ -207,6 +201,6 @@ export default function MarvinBrain() {
           </p>
         )}
       </div>
-    </section>
+    </div>
   );
 }

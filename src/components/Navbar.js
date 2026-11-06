@@ -1,20 +1,21 @@
 import React from "react";
 import { useTheme } from "../siteTheme";
-export default function Navbar() {
+export default function Navbar({ home = true }) {
   const { theme, toggleTheme } = useTheme();
   const dark = theme === "dark";
   return (
     <header className="site-header page-width">
       <a
-        href="#about"
+        href={home ? "#about" : "/"}
         className="wordmark"
         aria-label="Cashel Fitzgerald, home"
       >
         cf<span>.</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#brain">Marvin’s brain</a>
-        <a href="#projects">Work</a>
+        <a href="/about/">About</a>
+        <a href={home ? "#brain" : "/#brain"}>Marvin’s brain</a>
+        <a href={home ? "#projects" : "/#projects"}>Work</a>
         <a href="#contact">
           Say hello <span aria-hidden="true">↗</span>
         </a>

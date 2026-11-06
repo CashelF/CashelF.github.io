@@ -7,6 +7,7 @@ The favicon uses only SVG paths; the share card uses system sans-serif text
 and the existing portrait. The generated assets need no fonts or runtime code.
 """
 
+import argparse
 import asyncio
 import base64
 from pathlib import Path
@@ -37,8 +38,8 @@ header { position: absolute; top: 48px; left: 70px; right: 70px; display: flex; 
 .domain { color: #72736a; font-size: 18px; letter-spacing: .2px; }
 .copy { position: absolute; top: 182px; left: 70px; z-index: 1; }
 h1, p { margin: 0; }
-h1 { font-size: 75px; line-height: 1.13; font-weight: 400; letter-spacing: -3.4px; }
-.role { margin-top: 13px; color: #84877a; font-size: 60px; line-height: 1.12; font-weight: 400; letter-spacing: -2.6px; }
+h1 { font-size: 70px; line-height: 1.13; font-weight: 400; letter-spacing: -3.4px; }
+.role { margin-top: 22px; color: #84877a; font-size: 38px; line-height: 1.12; font-weight: 400; letter-spacing: -2.6px; }
 .portrait { position: absolute; top: 165px; right: 54px; width: 370px; height: 370px; object-fit: contain; }
 footer { position: absolute; left: 74px; right: 70px; bottom: 49px; display: flex; align-items: center; gap: 11px; color: #686a60; font-size: 21px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #ba4927; }
@@ -55,9 +56,9 @@ footer { position: absolute; left: 74px; right: 70px; bottom: 49px; display: fle
   </g>
 </svg>
 <header><div class="wordmark">cf<span>.</span></div><div class="domain">cashel.dev</div></header>
-<div class="copy"><h1>Hi, I’m Cash.</h1><p class="role">A machine learning<br>engineer.</p></div>
-<img class="portrait" src="__PORTRAIT__" alt="Caricature of Cash">
-<footer><span class="dot"></span><p>Building Zomma.</p></footer>
+<div class="copy"><h1>Cashel<br>Fitzgerald.</h1><p class="role">Co-founder &amp; CTO at Zomma.</p></div>
+<img class="portrait" src="__PORTRAIT__" alt="Illustrated portrait of Cashel Fitzgerald">
+<footer><span class="dot"></span><p>Computer-use agents. Machine learning.</p></footer>
 </html>
 '''
 
@@ -67,19 +68,20 @@ def optimize_png(path):
         image.save(path, optimize=True)
 
 
-async def main():
+async def main(card_only=False):
     PUBLIC.mkdir(parents=True, exist_ok=True)
-    (PUBLIC / "favicon.svg").write_text(ICON)
+    if not card_only:
+        (PUBLIC / "favicon.svg").write_text(ICON)
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True, args=["--no-sandbox"])
         page = await browser.new_page(device_scale_factor=1)
-        for size, filename in [
+        for size, filename in ([] if card_only else [
             (16, "favicon-16x16.png"),
             (32, "favicon-32x32.png"),
             (180, "apple-touch-icon.png"),
             (192, "android-chrome-192x192.png"),
             (512, "android-chrome-512x512.png"),
-        ]:
+        ]):
             await page.set_viewport_size({"width": size, "height": size})
             await page.set_content(
                 '<style>html,body{margin:0;background:transparent}svg{display:block;width:100vw;height:100vh}</style>'
@@ -88,8 +90,9 @@ async def main():
             target = PUBLIC / filename
             await page.screenshot(path=str(target), omit_background=True)
             optimize_png(target)
-        with Image.open(PUBLIC / "android-chrome-512x512.png") as icon:
-            icon.save(PUBLIC / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
+        if not card_only:
+            with Image.open(PUBLIC / "android-chrome-512x512.png") as icon:
+                icon.save(PUBLIC / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
         portrait = "data:image/png;base64," + base64.b64encode((PUBLIC / "cashel_animated.png").read_bytes()).decode()
         await page.set_viewport_size({"width": 1200, "height": 630})
         await page.set_content(CARD.replace("__PORTRAIT__", portrait))
@@ -105,4 +108,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--card-only", action="store_true", help="Regenerate only the social card")
+    asyncio.run(main(parser.parse_args().card_only))
