@@ -72,9 +72,8 @@ After publishing:
    that requests from the crawler's real IP addresses pass the firewall.
 4. Keep the website field on GitHub and LinkedIn set to `https://cashel.dev/`.
    Suggested profile description: “Co-founder & CTO at Zomma. Building
-   computer-use agents for financial operations.” Link the full name from the
-   Zomma company page, and update existing editable founder/alumni profiles
-   where appropriate.
+   computer-use agents for financial operations.” Update existing editable
+   founder/alumni profiles where appropriate.
 5. Record a baseline after release and compare it after recrawling: indexed
    pages; impressions/clicks for “Cashel Fitzgerald” and “Cashel Zomma”; AI
    referrals; and citations in Bing's supported AI experiences. Treat manual
