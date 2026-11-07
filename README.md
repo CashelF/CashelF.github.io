@@ -79,10 +79,15 @@ After publishing:
    referrals; and citations in Bing's supported AI experiences. Treat manual
    ChatGPT searches as spot checks, since answers vary between sessions.
 
-Account-dependent work was not completed by local build validation. Search
-Console, Bing, LinkedIn, and Cloudflare require their account sessions. GitHub
-already had the correct name and website; the available CLI credential lacks
-the user scope needed to update its bio.
+Google Search Console ownership of `https://cashel.dev/` was verified on
+November 6, 2026 using `public/googlee6d8823e95dde381.html`. Keep this file in
+the published site: Google periodically rechecks it to retain verified access.
+It is copied into the build with the other public files.
+
+Sitemap submission, URL inspection, Bing setup, and the LinkedIn/Cloudflare
+checks above still require their account sessions; local build validation
+does not complete them. GitHub already had the correct name and website; the
+available CLI credential lacks the user scope needed to update its bio.
 
 The favicon and app icons use the site's `cf.` mark. `public/index.html` owns the
 page title, canonical URL, profile metadata, and sharing-card tags; the 1200×630
