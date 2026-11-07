@@ -54,7 +54,7 @@ Keep `https://cashel.dev/` as the primary URL. The roots of
 keep redirects preserving paths when adding pages. Use the primary URL on
 public profiles.
 
-After publishing:
+For future releases and follow-up checks:
 
 1. In [Google Search Console](https://search.google.com/search-console), verify
    the `cashel.dev` property, submit `https://cashel.dev/sitemap.xml`, and inspect
@@ -84,10 +84,28 @@ November 6, 2026 using `public/googlee6d8823e95dde381.html`. Keep this file in
 the published site: Google periodically rechecks it to retain verified access.
 It is copied into the build with the other public files.
 
-Sitemap submission, URL inspection, Bing setup, and the LinkedIn/Cloudflare
-checks above still require their account sessions; local build validation
-does not complete them. GitHub already had the correct name and website; the
-available CLI credential lacks the user scope needed to update its bio.
+Account checks completed on November 6, 2026 (November 7 UTC):
+
+| Check | Result |
+| --- | --- |
+| Google sitemap | Success; all five content URLs discovered. |
+| Google homepage | Indexed; Google-selected canonical is `https://cashel.dev/`. The live test fetched the updated title and rendered content and found one valid ProfilePage item. |
+| Google new pages | About, Marvin, speaker adaptation, and Minecraft RL are discovered but not yet indexed. Indexing requests were accepted for all four and the updated homepage. |
+| Bing setup and sitemap | Imported the verified property and sitemap from Search Console. Sitemap status is Success, with five URLs and no errors or warnings. |
+| Bing URLs | Homepage indexed; the four new pages are discovered but not yet crawled. All five URL submissions were accepted. |
+| Bing live tests | Homepage and Minecraft RL are indexable. The homepage's old missing-H1 error is absent from the live test; its remaining notice concerns four intentionally empty alt attributes on decorative project thumbnails. Minecraft RL has no reported SEO/GEO issues. |
+| Cloudflare AI Crawl Control | Crawler blocking is off for Googlebot, BingBot, OAI-SearchBot, ChatGPT-User, and PerplexityBot. No policy changes were needed. Request totals alone do not establish verified crawler identity or AI citations. |
+
+Google's newly verified property's aggregate reports were still processing.
+Bing's AI Performance report showed zero citations in its three-month view;
+the new property's data was still initializing, so recheck before treating
+that as a settled baseline. Recheck indexing and search queries after the
+engines recrawl; accepted submissions do not mean the new pages are already
+indexed or guarantee placement in an AI answer.
+
+LinkedIn profile checks remain pending an authenticated session. GitHub already
+had the correct name and website; the available CLI credential lacks the user
+scope needed to update its bio.
 
 The favicon and app icons use the site's `cf.` mark. `public/index.html` owns the
 page title, canonical URL, profile metadata, and sharing-card tags; the 1200×630
