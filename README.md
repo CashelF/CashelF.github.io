@@ -94,6 +94,17 @@ REACT_APP_MARVIN_URL=http://127.0.0.1:7861 npm start
 `REACT_APP_MARVIN_URL` is a build-time override; it defaults to the public Hugging
 Face Space. Never put a Hugging Face write token in a frontend environment variable.
 
+## Starfall
+
+The Starfall project card links to https://cashel.dev/starfall/, a small multiplayer
+game. Its code is not in this repository: it lives in
+[CashelF/starfall](https://github.com/CashelF/starfall) and is published by that
+repository's own GitHub Pages, which GitHub serves under this site's domain. Only
+the card's thumbnail, `public/StarfallDemo.jpg`, is kept here.
+
+Do not add a `public/starfall/` folder to this site, or it would take the place
+of the game at that address.
+
 ## Content
 
 - `src/components/About.js`: current bio and Zomma link.

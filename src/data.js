@@ -34,6 +34,15 @@ export const projects = [
     link: "https://tonetrack.cashel.dev",
     hosted: true,
   },
+  {
+    title: "Starfall",
+    category: "Multiplayer game · WebGL",
+    description:
+      "Run around a tiny planet with friends and catch the stars that fall on it. No sign-up, on phones and laptops.",
+    thumbnail: "./StarfallDemo.jpg",
+    link: "https://cashel.dev/starfall/",
+    hosted: true,
+  },
 ];
 
 export const archiveProjects = [

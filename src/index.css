@@ -304,6 +304,19 @@ textarea {
 .project-image--3 {
   background: var(--image-panel-last);
 }
+.project-image--4 {
+  background: #080b1d;
+  padding: 0;
+}
+.project-image--4 img {
+  object-position: center 58%;
+}
+.project:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.project:last-child:nth-child(odd) .project-image {
+  height: 340px;
+}
 .project:hover .project-image img {
   transform: scale(1.025);
 }
@@ -434,8 +447,12 @@ textarea {
     height: 200px;
     padding: 20px;
   }
-  .project-image--2 {
+  .project-image--2,
+  .project-image--4 {
     padding: 0;
+  }
+  .project:last-child:nth-child(odd) .project-image {
+    height: 280px;
   }
 }
 @media (max-width: 600px) {
@@ -526,8 +543,12 @@ textarea {
     height: 235px;
     padding: 25px;
   }
-  .project-image--2 {
+  .project-image--2,
+  .project-image--4 {
     padding: 0;
+  }
+  .project:last-child:nth-child(odd) .project-image {
+    height: 235px;
   }
   .project-heading {
     margin-top: 13px;
