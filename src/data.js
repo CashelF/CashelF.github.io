@@ -5,16 +5,16 @@ export const projects = [
     description:
       "Adapting lip-reading models to new speakers from a few video frames, without gradient updates.",
     thumbnail: "./AVSRDemo.png",
-    link: "./Support-Conditioned_LoRA_for_Test-Time_Speaker_Adaptation.pdf",
+    link: "/projects/speaker-adaptation/",
     hosted: false,
   },
   {
     title: "Minecraft RL",
     category: "Reinforcement learning",
     description:
-      "Training agents to fight in Minecraft, with custom environments and two-agent training.",
+      "Training a combat policy in Minecraft, with a custom environment and a scripted opponent.",
     thumbnail: "./MinecraftRLDemo.png",
-    link: "https://github.com/CashelF/rl-minecraft-pvp",
+    link: "/projects/minecraft-rl/",
     hosted: false,
   },
   {

@@ -8,7 +8,7 @@ export default function Contact() {
         <a
           href="mailto:cashel@utexas.edu"
           className="contact-link"
-          data-robot-target="Email Cash"
+          data-robot-target="Email Cashel Fitzgerald"
         >
           Say hello <span aria-hidden="true">↗</span>
         </a>
@@ -16,6 +16,7 @@ export default function Contact() {
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} Cashel Fitzgerald</span>
         <div>
+          <a href="/about/">About Cashel</a>
           <a
             href="https://github.com/CashelF"
             target="_blank"

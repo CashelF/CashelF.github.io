@@ -17,12 +17,95 @@ Webpack version. The frontend is served at http://localhost:3000.
 
 ```bash
 npm run build
+npm run verify:static
 CI=true npm test -- --env=node --runInBand
 ```
 
 The production build is a static site in `build/`; `npm run deploy` publishes it
 to this repository’s GitHub Pages branch for `cashel.dev`, preserving the
 independently hosted `kd-detr-presentation/` directory.
+
+## Search and AI discovery
+
+`npm run build` runs `scripts/prerender.js` after compilation. It renders the
+shared React components into complete HTML for `/`, `/about/`, and the three
+`/projects/` write-ups. The browser hydrates that HTML and then mounts Marvin
+and the animated background. Biography, project descriptions, navigation, and
+source links remain readable with JavaScript disabled.
+
+`src/content.js` owns page content and routes; `src/seo.js` generates titles and
+linked Person, WebSite, ProfilePage, and Article data. Each generated page has
+its own canonical, description, sharing metadata, and structured data. The build
+generates the sitemap from those same routes, excluding the noindex 404 page.
+Update `public/sitemap.xml` too when adding routes so the development server
+continues to expose the current sitemap. Use `npm run build`, not a direct
+`craco build`, when packaging a release.
+
+`npm run verify:static` requires Python 3.9+ and checks the built HTML without
+executing JavaScript: content, canonicals, structured data, internal links,
+assets, and sitemap coverage. Deployment runs that check before publishing.
+The share card can be regenerated independently with
+`python3 scripts/generate_brand_assets.py --card-only`.
+
+### Account setup and measurement
+
+Keep `https://cashel.dev/` as the primary URL. The roots of
+`cashelfitzgerald.com` and `fitzgerald.cash` already permanently redirect there;
+keep redirects preserving paths when adding pages. Use the primary URL on
+public profiles.
+
+For future releases and follow-up checks:
+
+1. In [Google Search Console](https://search.google.com/search-console), verify
+   the `cashel.dev` property, submit `https://cashel.dev/sitemap.xml`, and inspect
+   the homepage and all four new pages. Check Google's chosen canonical,
+   retrieved HTML, crawl status, and indexing status. Request indexing for the
+   updated homepage and new pages when available.
+2. In [Bing Webmaster Tools](https://www.bing.com/webmasters/), verify or import
+   the same site and submit the sitemap. Check URL Inspection, crawl issues,
+   and the AI Performance report when data becomes available.
+3. In Cloudflare, check AI Crawl Control and security events for OAI-SearchBot
+   and other desired search crawlers. The deployed robots file includes
+   Cloudflare-managed rules in addition to `public/robots.txt`. Search access
+   should remain allowed; changing training preferences is not necessary.
+   A request using a bot's user-agent from a developer's machine does not prove
+   that requests from the crawler's real IP addresses pass the firewall.
+4. Keep the website field on GitHub and LinkedIn set to `https://cashel.dev/`.
+   Suggested profile description: “Co-founder & CTO at Zomma. Building
+   computer-use agents for financial operations.” Update existing editable
+   founder/alumni profiles where appropriate.
+5. Record a baseline after release and compare it after recrawling: indexed
+   pages; impressions/clicks for “Cashel Fitzgerald” and “Cashel Zomma”; AI
+   referrals; and citations in Bing's supported AI experiences. Treat manual
+   ChatGPT searches as spot checks, since answers vary between sessions.
+
+Google Search Console ownership of `https://cashel.dev/` was verified on
+November 6, 2026 using `public/googlee6d8823e95dde381.html`. Keep this file in
+the published site: Google periodically rechecks it to retain verified access.
+It is copied into the build with the other public files.
+
+Account checks completed on November 6, 2026 (November 7 UTC):
+
+| Check | Result |
+| --- | --- |
+| Google sitemap | Success; all five content URLs discovered. |
+| Google homepage | Indexed; Google-selected canonical is `https://cashel.dev/`. The live test fetched the updated title and rendered content and found one valid ProfilePage item. |
+| Google new pages | About, Marvin, speaker adaptation, and Minecraft RL are discovered but not yet indexed. Indexing requests were accepted for all four and the updated homepage. |
+| Bing setup and sitemap | Imported the verified property and sitemap from Search Console. Sitemap status is Success, with five URLs and no errors or warnings. |
+| Bing URLs | Homepage indexed; the four new pages are discovered but not yet crawled. All five URL submissions were accepted. |
+| Bing live tests | Homepage and Minecraft RL are indexable. The homepage's old missing-H1 error is absent from the live test; its remaining notice concerns four intentionally empty alt attributes on decorative project thumbnails. Minecraft RL has no reported SEO/GEO issues. |
+| Cloudflare AI Crawl Control | Crawler blocking is off for Googlebot, BingBot, OAI-SearchBot, ChatGPT-User, and PerplexityBot. No policy changes were needed. Request totals alone do not establish verified crawler identity or AI citations. |
+
+Google's newly verified property's aggregate reports were still processing.
+Bing's AI Performance report showed zero citations in its three-month view;
+the new property's data was still initializing, so recheck before treating
+that as a settled baseline. Recheck indexing and search queries after the
+engines recrawl; accepted submissions do not mean the new pages are already
+indexed or guarantee placement in an AI answer.
+
+LinkedIn profile checks remain pending an authenticated session. GitHub already
+had the correct name and website; the available CLI credential lacks the user
+scope needed to update its bio.
 
 The favicon and app icons use the site's `cf.` mark. `public/index.html` owns the
 page title, canonical URL, profile metadata, and sharing-card tags; the 1200×630

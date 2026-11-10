@@ -7,9 +7,9 @@ export default function About() {
           <span className="accent-dot" /> ENGINEER & FOUNDER
         </p>
         <h1>
-          Hi, I’m Cash.
+          Cashel
           <br />
-          <span>A machine learning engineer.</span>
+          Fitzgerald.
         </h1>
         <p className="hero-description">
           Co-founder & CTO at{" "}
@@ -29,11 +29,11 @@ export default function About() {
       </div>
       <figure className="hero-portrait">
         <img
-          src="./cashel_animated.png"
-          alt="Caricature of Cash"
+          src="/cashel_animated.png"
+          alt="Illustrated portrait of Cashel Fitzgerald"
           width="1024"
           height="1024"
-          data-robot-target="Caricature of Cash"
+          data-robot-target="Portrait of Cashel Fitzgerald"
           data-robot-contour="true"
         />
         <figcaption>

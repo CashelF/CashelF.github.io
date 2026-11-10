@@ -22,8 +22,8 @@ export default function Projects() {
           <a
             className="project robot-play-target"
             href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
+            target={project.link.startsWith("/") ? undefined : "_blank"}
+            rel={project.link.startsWith("/") ? undefined : "noopener noreferrer"}
             key={project.title}
             data-robot-target={project.title}
             data-robot-platform="card"
@@ -31,7 +31,7 @@ export default function Projects() {
             <div className={`project-image project-image--${index}`}>
               <img src={project.thumbnail} alt="" loading="lazy" />
               <span className="project-open" aria-hidden="true">
-                ↗
+                {project.link.startsWith("/") ? "→" : "↗"}
               </span>
             </div>
             <div className="project-heading">

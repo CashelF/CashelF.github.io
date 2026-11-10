@@ -18,9 +18,16 @@ function systemTheme() {
 }
 
 export function ThemeProvider({ children }) {
-  const [preference, setPreference] = React.useState(savedTheme);
-  const [system, setSystem] = React.useState(systemTheme);
+  // Match the static HTML on the first render. The inline head script sets the
+  // paint palette before hydration, then this effect synchronizes the controls.
+  const [preference, setPreference] = React.useState(null);
+  const [system, setSystem] = React.useState("light");
   const theme = preference || system;
+
+  React.useEffect(() => {
+    setPreference(savedTheme());
+    setSystem(systemTheme());
+  }, []);
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;

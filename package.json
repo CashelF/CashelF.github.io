@@ -18,6 +18,8 @@
     "deploy": "node scripts/deploy.js",
     "start": "craco start",
     "build": "craco build",
+    "postbuild": "node scripts/prerender.js",
+    "verify:static": "python3 scripts/verify-static.py",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
@@ -29,6 +31,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^9.8.6",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-react": "6.24.1",
+    "babel-register": "6.26.0",
     "postcss": "^8.4.32",
     "sass": "^1.97.3",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2"

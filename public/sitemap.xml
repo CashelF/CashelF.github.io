@@ -3,4 +3,8 @@
   <url>
     <loc>https://cashel.dev/</loc>
   </url>
+  <url><loc>https://cashel.dev/about/</loc></url>
+  <url><loc>https://cashel.dev/projects/marvin/</loc></url>
+  <url><loc>https://cashel.dev/projects/speaker-adaptation/</loc></url>
+  <url><loc>https://cashel.dev/projects/minecraft-rl/</loc></url>
 </urlset>
