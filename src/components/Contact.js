@@ -1,17 +1,20 @@
 import React from "react";
+import { useContactDialog } from "./ContactDialog";
 export default function Contact() {
+  const openContact = useContactDialog();
   return (
     <footer id="contact" className="contact-section page-width">
       <p className="eyebrow">03 / GET IN TOUCH</p>
       <div className="contact-heading">
         <h2>Have something in mind?</h2>
-        <a
-          href="mailto:cashel@utexas.edu"
-          className="contact-link"
-          data-robot-target="Email Cash"
+        <button
+          type="button"
+          className="contact-link text-button"
+          data-robot-target="Message Cash"
+          onClick={openContact}
         >
           Say hello <span aria-hidden="true">↗</span>
-        </a>
+        </button>
       </div>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} Cashel Fitzgerald</span>

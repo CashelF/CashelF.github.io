@@ -6,9 +6,10 @@ import Projects from "./components/Projects";
 import SiteRobot from "./components/SiteRobot";
 import MarvinBrain from "./components/MarvinBrain";
 import NeuralNetworkBackground from "./components/NeuralNetworkBackground";
+import { ContactProvider } from "./components/ContactDialog";
 import { ThemeProvider, useTheme } from "./siteTheme";
 export default function App() {
-  return <ThemeProvider><Portfolio /></ThemeProvider>;
+  return <ThemeProvider><ContactProvider><Portfolio /></ContactProvider></ThemeProvider>;
 }
 function Portfolio() {
   const mainRef = React.useRef(null);

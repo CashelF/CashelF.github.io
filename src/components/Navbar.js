@@ -1,8 +1,10 @@
 import React from "react";
 import { useTheme } from "../siteTheme";
+import { useContactDialog } from "./ContactDialog";
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const dark = theme === "dark";
+  const openContact = useContactDialog();
   return (
     <header className="site-header page-width">
       <a
@@ -15,9 +17,9 @@ export default function Navbar() {
       <nav aria-label="Main navigation">
         <a href="#brain">Marvin’s brain</a>
         <a href="#projects">Work</a>
-        <a href="#contact">
+        <button type="button" className="text-button" onClick={openContact}>
           Say hello <span aria-hidden="true">↗</span>
-        </a>
+        </button>
         <button
           className="theme-toggle"
           type="button"

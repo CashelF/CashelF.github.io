@@ -45,6 +45,9 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 35px;
+  /* Marvin and his chat panel can walk past the page edge; never scroll sideways. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 body {
   margin: 0;
@@ -70,6 +73,15 @@ a {
 }
 button {
   cursor: pointer;
+}
+.text-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
 }
 button:disabled {
   cursor: not-allowed;
@@ -424,6 +436,122 @@ textarea {
 .footer-bottom > div {
   display: flex;
   gap: 22px;
+}
+.site-header nav .text-button {
+  transition: color 0.15s;
+}
+.site-header nav .text-button:hover {
+  color: var(--accent);
+}
+.contact-dialog {
+  width: min(480px, calc(100% - 40px));
+  max-height: calc(100% - 40px);
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  overflow: auto;
+}
+.contact-dialog::backdrop {
+  background: rgba(20, 22, 18, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.contact-dialog__panel {
+  padding: 22px 28px 30px;
+}
+.contact-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.contact-dialog__close {
+  width: 32px;
+  height: 32px;
+  margin-right: -8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1;
+}
+.contact-dialog__close:hover {
+  color: var(--ink);
+}
+.contact-dialog h2 {
+  margin-bottom: 22px;
+  font-size: 28px;
+  font-weight: 450;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.contact-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.contact-dialog form h2 {
+  margin-bottom: 6px;
+}
+.contact-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.contact-dialog input,
+.contact-dialog textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  padding: 9px 11px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 14px;
+}
+.contact-dialog textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+.contact-dialog input:focus-visible,
+.contact-dialog textarea:focus-visible {
+  outline-offset: 0;
+  border-color: var(--muted);
+}
+.contact-dialog__trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.contact-dialog__error {
+  color: var(--accent);
+  font-size: 12px;
+}
+.contact-dialog__submit {
+  align-self: flex-start;
+  height: 38px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12px;
+}
+.contact-dialog__submit span {
+  margin-left: 14px;
+}
+.contact-dialog__submit:disabled {
+  opacity: 0.6;
+}
+.contact-dialog__done p {
+  margin-bottom: 22px;
+  color: var(--description);
+}
+.contact-dialog__done h2 {
+  margin-bottom: 10px;
 }
 @media (max-width: 900px) {
   .page-width {
