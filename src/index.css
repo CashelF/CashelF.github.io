@@ -323,6 +323,13 @@ textarea {
 .project-image--4 img {
   object-position: center 58%;
 }
+.project-image--5 {
+  background: #170e12;
+  padding: 0;
+}
+.project-image--5 img {
+  object-position: center 42%;
+}
 .project:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
@@ -576,7 +583,8 @@ textarea {
     padding: 20px;
   }
   .project-image--2,
-  .project-image--4 {
+  .project-image--4,
+  .project-image--5 {
     padding: 0;
   }
   .project:last-child:nth-child(odd) .project-image {
@@ -672,7 +680,8 @@ textarea {
     padding: 25px;
   }
   .project-image--2,
-  .project-image--4 {
+  .project-image--4,
+  .project-image--5 {
     padding: 0;
   }
   .project:last-child:nth-child(odd) .project-image {

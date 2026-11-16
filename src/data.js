@@ -43,6 +43,15 @@ export const projects = [
     link: "https://cashel.dev/starfall/",
     hosted: true,
   },
+  {
+    title: "Emberleaf",
+    category: "Multiplayer game · WebGL",
+    description:
+      "Walk into a painted autumn valley with whoever else is there, light its stone lanterns and fight off the imps that put them out. No sign-up, on phones and laptops.",
+    thumbnail: "./EmberleafDemo.jpg",
+    link: "https://cashel.dev/emberleaf/",
+    hosted: true,
+  },
 ];
 
 export const archiveProjects = [
